@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Для бизнеса — Глемпинги и отели</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container navbar">
+            <div class="brand">Компания</div>
+            <nav class="nav-links">
+                <a class="nav-link" href="index.html">Главная</a>
+                <a class="nav-link" href="catalog.html">Каталог</a>
+                <a class="nav-link" href="stock.html">В наличии</a>
+                <a class="nav-link" href="b2b.html">Для бизнеса</a>
+                <a class="nav-link" href="cases.html">Портфолио</a>
+                <a class="nav-link" href="factory.html">Производство</a>
+                <a class="nav-link" href="process.html">Этапы</a>
+                <a class="nav-link" href="faq.html">FAQ</a>
+                <a class="nav-link" href="contacts.html">Контакты</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="section">
+            <div class="container">
+                <h1>Для бизнеса</h1>
+                <p>Готовые решения для глемпингов и модульных мини‑отелей в ЛО</p>
+                <div class="cta-row">
+                    <a class="button primary" href="contacts.html">Получить просчёт</a>
+                    <a class="button outline" href="cases.html">Смотреть кейсы</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2>Пакеты</h2>
+                <p>Выберите уровень комплектации под вашу модель окупаемости</p>
+                <div class="cards">
+                    <div class="card">
+                        <h3>Старт</h3>
+                        <ul>
+                            <li>Модули 30–40 м², зимний пакет</li>
+                            <li>Инженерия и санузел, электрика</li>
+                            <li>Доставка и монтаж в ЛО 3–5 дней</li>
+                            <li>Гарантия, документация для запуска</li>
+                        </ul>
+                        <div class="cta-row">
+                            <a class="button primary" href="contacts.html">Запросить КП</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Стандарт</h3>
+                        <ul>
+                            <li>Планировки 40–60 м², террасы</li>
+                            <li>Полный инженерный пакет</li>
+                            <li>Пакет оснащения для аренды</li>
+                            <li>Сопровождение подключения</li>
+                        </ul>
+                        <div class="cta-row">
+                            <a class="button primary" href="contacts.html">Запросить КП</a>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Про</h3>
+                        <ul>
+                            <li>Комплектация «под ключ», меблировка</li>
+                            <li>Ландшафт и общественные зоны (опция)</li>
+                            <li>Интеграция с бронированиями (опция)</li>
+                            <li>Запуск под ключ и шеф‑монтаж</li>
+                        </ul>
+                        <div class="cta-row">
+                            <a class="button primary" href="contacts.html">Запросить КП</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2>Финансы</h2>
+                <p>Оцените выручку и срок окупаемости вашего проекта</p>
+                <div class="calc-grid">
+                    <label>Количество модулей
+                        <input id="calc-units" type="number" min="1" value="10">
+                    </label>
+                    <label>Средняя цена за ночь, ₽
+                        <input id="calc-adr" type="number" min="0" value="5000">
+                    </label>
+                    <label>Средняя загрузка, %
+                        <input id="calc-occ" type="number" min="0" max="100" value="65">
+                    </label>
+                    <label>Дней в месяце
+                        <input id="calc-days" type="number" min="1" max="31" value="30">
+                    </label>
+                    <label>Инвестиции, ₽
+                        <input id="calc-capex" type="number" min="0" value="15000000">
+                    </label>
+                </div>
+                <div class="results">
+                    <p>Выручка в месяц: <strong id="calc-rev-month">—</strong></p>
+                    <p>Выручка в год: <strong id="calc-rev-year">—</strong></p>
+                    <p>Окупаемость: <strong id="calc-payback">—</strong></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div>© Компания, 2025</div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html> 

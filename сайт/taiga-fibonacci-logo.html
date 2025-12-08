@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТАйга - Логотип Фибоначчи</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2a5298;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .controls button {
+            background: #2a5298;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .controls button:hover {
+            background: #1e3c72;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .info h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+
+        .fibonacci-numbers {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .fib-number {
+            background: #2a5298;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ТАйга - Логотип на основе Фибоначчи</h1>
+        
+        <div class="logo-container">
+            <canvas id="logoCanvas" width="600" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleSpiral()">Показать/Скрыть спираль</button>
+            <button onclick="toggleNumbers()">Показать/Скрыть числа</button>
+            <button onclick="toggleAnimation()">Анимация</button>
+            <button onclick="resetLogo()">Сброс</button>
+        </div>
+
+        <div class="info">
+            <h3>О логотипе:</h3>
+            <p>Логотип "ТАйга" создан на основе последовательности Фибоначчи и золотого сечения (φ = 1.618).</p>
+            <p><strong>Последовательность Фибоначчи:</strong></p>
+            <div class="fibonacci-numbers">
+                <span class="fib-number">0</span>
+                <span class="fib-number">1</span>
+                <span class="fib-number">1</span>
+                <span class="fib-number">2</span>
+                <span class="fib-number">3</span>
+                <span class="fib-number">5</span>
+                <span class="fib-number">8</span>
+                <span class="fib-number">13</span>
+                <span class="fib-number">21</span>
+                <span class="fib-number">34</span>
+                <span class="fib-number">55</span>
+            </div>
+            <p style="margin-top: 10px;">Буквы расположены по спирали Фибоначчи, размеры элементов основаны на пропорциях золотого сечения.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('logoCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Параметры
+        let showSpiral = true;
+        let showNumbers = false;
+        let isAnimating = false;
+        let animationFrame = 0;
+        
+        // Золотое сечение
+        const PHI = 1.618033988749895;
+        
+        // Центр канваса
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Последовательность Фибоначчи
+        function fibonacci(n) {
+            if (n <= 1) return n;
+            let a = 0, b = 1;
+            for (let i = 2; i <= n; i++) {
+                [a, b] = [b, a + b];
+            }
+            return b;
+        }
+        
+        // Рисование спирали Фибоначчи
+        function drawFibonacciSpiral() {
+            if (!showSpiral) return;
+            
+            ctx.strokeStyle = '#00B0F0';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            
+            let x = centerX;
+            let y = centerY;
+            let angle = 0;
+            const scale = 3;
+            
+            // Рисуем квадраты и дуги
+            for (let i = 1; i <= 8; i++) {
+                const fib = fibonacci(i);
+                const size = fib * scale;
+                
+                // Цвет квадрата (градиент)
+                const hue = (i * 30) % 360;
+                ctx.fillStyle = `hsla(${hue}, 70%, 80%, 0.2)`;
+                ctx.strokeStyle = `hsla(${hue}, 70%, 50%, 0.5)`;
+                ctx.setLineDash([]);
+                
+                // Рисуем квадрат
+                ctx.beginPath();
+                ctx.rect(x, y, size, size);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Рисуем дугу спирали
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.arc(x + size, y + size, size, Math.PI, Math.PI * 1.5);
+                ctx.stroke();
+                
+                // Перемещаемся для следующего квадрата
+                if (i % 4 === 1) {
+                    x += size;
+                } else if (i % 4 === 2) {
+                    y += size;
+                    x -= fibonacci(i - 1) * scale;
+                } else if (i % 4 === 3) {
+                    x -= size;
+                    y -= fibonacci(i - 1) * scale;
+                } else {
+                    y -= size;
+                }
+            }
+        }
+        
+        // Рисование чисел Фибоначчи
+        function drawFibonacciNumbers() {
+            if (!showNumbers) return;
+            
+            ctx.fillStyle = '#2a5298';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'center';
+            
+            let x = centerX;
+            let y = centerY;
+            const scale = 3;
+            
+            for (let i = 1; i <= 8; i++) {
+                const fib = fibonacci(i);
+                const size = fib * scale;
+                
+                ctx.fillText(fib.toString(), x + size / 2, y + size / 2);
+                
+                if (i % 4 === 1) {
+                    x += size;
+                } else if (i % 4 === 2) {
+                    y += size;
+                    x -= fibonacci(i - 1) * scale;
+                } else if (i % 4 === 3) {
+                    x -= size;
+                    y -= fibonacci(i - 1) * scale;
+                } else {
+                    y -= size;
+                }
+            }
+        }
+        
+        // Рисование текста "ТАйга" по спирали
+        function drawText() {
+            const text = "ТАйга";
+            const letters = text.split('');
+            
+            // Позиции букв на основе спирали Фибоначчи
+            const positions = [
+                { x: centerX + 50, y: centerY - 80, size: 60, angle: 0 },
+                { x: centerX + 120, y: centerY - 40, size: 50, angle: 15 },
+                { x: centerX + 140, y: centerY + 30, size: 45, angle: 30 },
+                { x: centerX + 100, y: centerY + 100, size: 40, angle: 45 },
+                { x: centerX + 20, y: centerY + 120, size: 35, angle: 60 }
+            ];
+            
+            letters.forEach((letter, index) => {
+                if (index < positions.length) {
+                    const pos = positions[index];
+                    
+                    // Анимация (если включена)
+                    let offsetX = 0;
+                    let offsetY = 0;
+                    if (isAnimating) {
+                        const wave = Math.sin((animationFrame + index * 20) * 0.1) * 5;
+                        offsetY = wave;
+                    }
+                    
+                    ctx.save();
+                    ctx.translate(pos.x + offsetX, pos.y + offsetY);
+                    ctx.rotate((pos.angle * Math.PI) / 180);
+                    
+                    // Градиент для букв
+                    const gradient = ctx.createLinearGradient(-pos.size/2, -pos.size/2, pos.size/2, pos.size/2);
+                    gradient.addColorStop(0, '#00B0F0');
+                    gradient.addColorStop(1, '#1e3c72');
+                    ctx.fillStyle = gradient;
+                    
+                    ctx.font = `bold ${pos.size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(letter, 0, 0);
+                    
+                    ctx.restore();
+                }
+            });
+        }
+        
+        // Основная функция отрисовки
+        function draw() {
+            // Очистка канваса
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Фон
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем элементы
+            drawFibonacciSpiral();
+            drawFibonacciNumbers();
+            drawText();
+            
+            // Если анимация включена, продолжаем
+            if (isAnimating) {
+                animationFrame++;
+                requestAnimationFrame(draw);
+            }
+        }
+        
+        // Управление
+        function toggleSpiral() {
+            showSpiral = !showSpiral;
+            draw();
+        }
+        
+        function toggleNumbers() {
+            showNumbers = !showNumbers;
+            draw();
+        }
+        
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            if (isAnimating) {
+                animationFrame = 0;
+                draw();
+            } else {
+                draw();
+            }
+        }
+        
+        function resetLogo() {
+            showSpiral = true;
+            showNumbers = false;
+            isAnimating = false;
+            animationFrame = 0;
+            draw();
+        }
+        
+        // Инициализация
+        draw();
+    </script>
+</body>
+</html>

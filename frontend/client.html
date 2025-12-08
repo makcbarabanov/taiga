@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Проект клиента</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/client.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <nav class="nav">
+                <a href="taiga.html" class="nav-link">Объекты</a>
+                <a href="income.html" class="nav-link">Доходы</a>
+                <a href="expenses.html" class="nav-link">Расходы</a>
+                <a href="cash.html" class="nav-link">Касса</a>
+            </nav>
+        </header>
+
+        <!-- Project Info -->
+        <div class="project-info" id="project-info">
+            <h2 id="project-title">Загрузка...</h2>
+            <p id="project-client"></p>
+            <p id="project-status"></p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('stat')">Стат</button>
+            <button class="tab-btn" onclick="showTab('works')">Работы</button>
+            <button class="tab-btn" onclick="showTab('materials')">Снаб</button>
+            <button class="tab-btn" onclick="showTab('journal')">Журнал</button>
+            <button class="tab-btn" onclick="showTab('timesheet')">Табель</button>
+        </div>
+
+        <!-- Tab Content -->
+        <main class="main">
+            <!-- Tab: Статистика -->
+            <div id="tab-stat" class="tab-content active">
+                <div class="tab-header">
+                    <h2>Статистика по дням</h2>
+                    <button class="btn btn-primary" onclick="openAddStatModal()">+ Добавить запись</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>План (%)</th>
+                                <th>Факт (%)</th>
+                                <th>Разница</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stat-tbody">
+                            <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Работы -->
+            <div id="tab-works" class="tab-content">
+                <div class="tab-header">
+                    <h2>Опись работ</h2>
+                    <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Раздел</th>
+                                <th>Наименование работы</th>
+                                <th>Ед. изм.</th>
+                                <th>Кол-во</th>
+                                <th>Цена за ед.</th>
+                                <th>Стоимость</th>
+                                <th>Прогресс (%)</th>
+                                <th>Выполнено</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="works-tbody">
+                            <tr><td colspan="10" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Снаб (Материалы) -->
+            <div id="tab-materials" class="tab-content">
+                <div class="tab-header">
+                    <h2>Ведомость материалов (СНАБ)</h2>
+                    <button class="btn btn-primary" onclick="openAddMaterialModal()">+ Добавить материал</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Наименование</th>
+                                <th>Ед. изм.</th>
+                                <th colspan="3">Смета</th>
+                                <th colspan="3">Факт</th>
+                                <th>Разница</th>
+                                <th>Действия</th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th>Кол-во</th>
+                                <th>Цена</th>
+                                <th>Ст-сть</th>
+                                <th>Кол-во</th>
+                                <th>Цена</th>
+                                <th>Ст-сть</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="materials-tbody">
+                            <tr><td colspan="11" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="materials-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Всего товаров:</span>
+                        <span class="summary-value" id="total-materials">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Сметная стоимость:</span>
+                        <span class="summary-value" id="planned-cost">0.00 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Приобретено товаров:</span>
+                        <span class="summary-value" id="purchased-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Снабжение:</span>
+                        <span class="summary-value" id="supply-percent">0%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Экономия:</span>
+                        <span class="summary-value" id="savings">0.00 ₽</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Осталось потратить:</span>
+                        <span class="summary-value" id="remaining">0.00 ₽</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Журнал -->
+            <div id="tab-journal" class="tab-content">
+                <div class="tab-header">
+                    <h2>Журнал ведения работ</h2>
+                    <button class="btn btn-primary" onclick="openAddJournalModal()">+ Добавить запись</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Рабочий</th>
+                                <th>Работа</th>
+                                <th>Часов</th>
+                                <th>Выполнено</th>
+                                <th>Примечания</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journal-tbody">
+                            <tr><td colspan="7" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab: Табель -->
+            <div id="tab-timesheet" class="tab-content">
+                <div class="tab-header">
+                    <h2>Табель</h2>
+                    <p class="tab-description">Формируется автоматически из журнала работ</p>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Рабочий</th>
+                                <th>Работа</th>
+                                <th>Часов</th>
+                                <th>Выполнено</th>
+                                <th>Ед. изм.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timesheet-tbody">
+                            <tr><td colspan="6" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals будут добавлены через JS -->
+    <div id="modals-container"></div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/client.js"></script>
+</body>
+</html>
+
+

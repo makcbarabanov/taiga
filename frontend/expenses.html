@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Расходы</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/expenses.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <nav class="nav">
+                <a href="taiga.html" class="nav-link">Объекты</a>
+                <a href="income.html" class="nav-link">Доходы</a>
+                <a href="expenses.html" class="nav-link active">Расходы</a>
+                <a href="cash.html" class="nav-link">Касса</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Actions -->
+            <div class="actions">
+                <button class="btn btn-primary" onclick="addNewRow()">+ Добавить строку</button>
+                <button class="btn btn-secondary" onclick="openUploadModal()">📄 Загрузить PDF/XLS</button>
+                <button class="btn btn-success" onclick="saveAllChanges()">💾 Сохранить все изменения</button>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <select id="filter-project" onchange="filterExpenses()">
+                    <option value="">Все объекты</option>
+                </select>
+                <select id="filter-category" onchange="filterExpenses()">
+                    <option value="">Все категории</option>
+                </select>
+                <input type="month" id="filter-month" onchange="filterExpenses()">
+            </div>
+
+            <!-- Expenses Table -->
+            <div class="table-container editable-table-container">
+                <table class="table editable-table" id="expenses-table">
+                    <thead>
+                        <tr>
+                            <th class="col-id">N</th>
+                            <th class="col-date">Дата</th>
+                            <th class="col-category">Категория</th>
+                            <th class="col-subcategory">Подкатегория</th>
+                            <th class="col-unit">Ед. изм.</th>
+                            <th class="col-quantity">Кол-во</th>
+                            <th class="col-price">Цена</th>
+                            <th class="col-amount">Стоимость</th>
+                            <th class="col-client">Клиент</th>
+                            <th class="col-project">Объект</th>
+                            <th class="col-shop">Магазин</th>
+                            <th class="col-comment">Комментарий</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenses-tbody">
+                        <!-- Данные будут загружены через JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary">
+                <div class="summary-item">
+                    <span class="summary-label">Всего расходов:</span>
+                    <span class="summary-value" id="total-expenses">0.00 ₽</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Upload PDF/XLS -->
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUploadModal()">&times;</span>
+            <h2>Загрузить чек (PDF/XLS)</h2>
+            <form id="upload-form">
+                <div class="form-group">
+                    <label for="upload-file">Выберите файл</label>
+                    <input type="file" id="upload-file" name="file" accept=".pdf,.xls,.xlsx" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Загрузить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/expenses.js"></script>
+</body>
+</html>
+

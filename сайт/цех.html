@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ производственных помещений</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            font-size: 28px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+            padding: 15px 10px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        .price {
+            font-weight: 600;
+            color: #28a745;
+        }
+        .area {
+            font-weight: 500;
+            color: #007bff;
+        }
+        .location {
+            color: #6c757d;
+            font-size: 13px;
+        }
+        .link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+        .yes {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .no {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .status-call {
+            color: #28a745;
+            font-weight: 600;
+            background-color: #d4edda;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .status-reject {
+            color: #dc3545;
+            font-weight: 600;
+            background-color: #f8d7da;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .status-ideal {
+            color: #ffc107;
+            font-weight: 600;
+            background-color: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .status-urgent {
+            color: #dc3545;
+            font-weight: 700;
+            background-color: #f8d7da;
+            padding: 4px 8px;
+            border-radius: 4px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        .info {
+            background-color: #e7f3ff;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 Анализ производственных помещений</h1>
+        
+        <div class="info">
+            <h3>📊 Статистика</h3>
+            <p><strong>Всего объявлений:</strong> <span id="total-count">14</span></p>
+            <p><strong>Средняя цена за м²:</strong> <span id="avg-price">325</span> ₽</p>
+            <p><strong>Общая площадь:</strong> <span id="total-area">3360</span> м²</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>ИМЯ</th>
+                    <th>Наименование</th>
+                    <th>Цена в месяц</th>
+                    <th>Цена за м²</th>
+                    <th>Площадь</th>
+                    <th>Высота потолков</th>
+                    <th>Мощность электросети</th>
+                    <th>Арендные каникулы</th>
+                    <th>Тип аренды</th>
+                    <th>Вход</th>
+                    <th>Отопление</th>
+                    <th>Расположение</th>
+                    <th>СТАТУС</th>
+                    <th>Ссылка</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Пользователь</td>
+                    <td>Производство, 240 м²</td>
+                    <td class="price">108 000</td>
+                    <td class="price">450</td>
+                    <td class="area">240 м²</td>
+                    <td>7.2 м</td>
+                    <td>150 кВт</td>
+                    <td class="yes">Да</td>
+                    <td>Прямая</td>
+                    <td>Со двора</td>
+                    <td>Автономное</td>
+                    <td class="location">Ленинградская обл., Тосненский р-н, Тельмановское городское поселение, технопарк Федоровское, Ресурсная ул., 18</td>
+                    <td class="status-call">ПОЗВОНИТЬ</td>
+                    <td><a href="https://www.avito.ru/fedorovskoe/kommercheskaya_nedvizhimost/proizvodstvo_240_m_7396481093" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Пользователь</td>
+                    <td>Производство, склад, ангар - 90 м.кв</td>
+                    <td class="price">60 000</td>
+                    <td class="price">667</td>
+                    <td class="area">90 м²</td>
+                    <td>6 м</td>
+                    <td>37 кВт</td>
+                    <td class="yes">Да</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Центральное газовое</td>
+                    <td class="location">Ленинградская обл., Тосненский р-н, Фёдоровское городское поселение, д. Аннолово, Специальная ул., 29</td>
+                    <td class="status-call">ПОЗВОНИТЬ</td>
+                    <td><a href="https://www.avito.ru/fedorovskoe/kommercheskaya_nedvizhimost/proizvodstvo_sklad_angar_-_90_m.kv_7531601636" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Александр</td>
+                    <td>Склад, 200 м²</td>
+                    <td class="price">80 000</td>
+                    <td class="price">400</td>
+                    <td class="area">200 м²</td>
+                    <td>9.8 м</td>
+                    <td>10 кВт</td>
+                    <td class="no">Нет</td>
+                    <td>Прямая</td>
+                    <td>Со двора</td>
+                    <td>Нет</td>
+                    <td class="location">Санкт-Петербург, Макулатурный пр., 5к3В</td>
+                    <td class="status-call">ПОЗВОНИТЬ</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/sklad_200_m_7612371222" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Анна</td>
+                    <td>Склад 150 м2 вблизи Гатчины</td>
+                    <td class="price">75 000</td>
+                    <td class="price">500</td>
+                    <td class="area">150 м²</td>
+                    <td>8 м</td>
+                    <td>15 кВт</td>
+                    <td class="no">Нет</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Гатчинский муниципальный округ, пос. Новый Свет, 113Б</td>
+                    <td class="status-call">ПОЗВОНИТЬ</td>
+                    <td><a href="https://www.avito.ru/novyy_svet/kommercheskaya_nedvizhimost/sklad_150_m2_vblizi_gatchiny_7572357591" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Владимир</td>
+                    <td>Склад, 70 м²</td>
+                    <td class="price">20 000</td>
+                    <td class="price">286</td>
+                    <td class="area">70 м²</td>
+                    <td>7 м</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>-</td>
+                    <td class="location">Ленинградская обл., Тосненский р-н, Фёдоровское городское поселение, городской пос. Фёдоровское, Почтовая ул., 19</td>
+                    <td class="status-reject">ОТКАЗ - нецелевое</td>
+                    <td><a href="https://www.avito.ru/fedorovskoe/kommercheskaya_nedvizhimost/sklad_70_m_4357732843" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Евгений</td>
+                    <td>Склад, 143 м²</td>
+                    <td class="price">39 000</td>
+                    <td class="price">273</td>
+                    <td class="area">143 м²</td>
+                    <td>3 м</td>
+                    <td>5 кВт</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Всеволожский р-н, Заневское городское поселение, д. Новосергиевка, пр. к Промзоне Новосергиевская, 7</td>
+                    <td class="status-reject">ОТКАЗ - нецелевое</td>
+                    <td><a href="https://www.avito.ru/fedorovskoe/kommercheskaya_nedvizhimost/sklad_143_m_7543683874" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Евгений</td>
+                    <td>Склад, 143 м²</td>
+                    <td class="price">39 000</td>
+                    <td class="price">273</td>
+                    <td class="area">143 м²</td>
+                    <td>3 м</td>
+                    <td>5 кВт</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Всеволожский р-н, Заневское городское поселение, д. Новосергиевка, пр. к Промзоне Новосергиевская, 7</td>
+                    <td class="status-ideal">ИДЕАЛЬНО - но очень далеко</td>
+                    <td><a href="https://www.avito.ru/fedorovskoe/kommercheskaya_nedvizhimost/sklad_143_m_7543683874" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>Ольга</td>
+                    <td>Производственно-складское, 759 м²</td>
+                    <td class="price">60 720</td>
+                    <td class="price">80</td>
+                    <td class="area">759 м²</td>
+                    <td>7.5 м</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Волосовский р-н, Большеврудское сельское поселение, д. Большая Вруда, квартал Территория 2, 2</td>
+                    <td class="status-reject">низкие потолки 2м</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/proizvodstvenno-skladskoe_759_m_7393279468" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Дунаев Денис Владимирович</td>
+                    <td>Помещение под Склад, Производство. 72 м²</td>
+                    <td class="price">60 000</td>
+                    <td class="price">833</td>
+                    <td class="area">72 м²</td>
+                    <td>2 м</td>
+                    <td>15 кВт</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Автономное</td>
+                    <td class="location">Ленинградская обл., Тосненский р-н, Фёдоровское городское поселение, городской пос. Фёдоровское, Средняя ул., 12к1</td>
+                    <td class="status-ideal">идеально но очень далеко</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/pomeshchenie_pod_sklad_proizvodstvo_72_m_7416311521" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Ольга</td>
+                    <td>Производстведственно-складское, 254.2 м²</td>
+                    <td class="price">35 250</td>
+                    <td class="price">139</td>
+                    <td class="area">254.2 м²</td>
+                    <td>5.8 м</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Кировский р-н, Назиевское городское поселение, городской пос. Назия, ул. Артеменко, 12</td>
+                    <td class="status-reject">ОТКАЗ - находится на третьем этаже</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/proizvodstvedstvenno-skladskoe_254.2_m_7425109326" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Пользователь</td>
+                    <td>Производство, 45 м²</td>
+                    <td class="price">30 000</td>
+                    <td class="price">667</td>
+                    <td class="area">45 м²</td>
+                    <td>4 м</td>
+                    <td>20 кВт</td>
+                    <td>-</td>
+                    <td>Субаренда</td>
+                    <td>Со двора</td>
+                    <td>Автономное</td>
+                    <td class="location">Санкт-Петербург, пос. Парголово, Подгорная ул., 35А</td>
+                    <td class="status-reject">ОТКАЗ технически не приспособлено</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/proizvodstvo_45_m_2174703752" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>Masterskie</td>
+                    <td>Производство, 50 м²</td>
+                    <td class="price">600</td>
+                    <td class="price">12</td>
+                    <td class="area">50 м²</td>
+                    <td>5 м</td>
+                    <td>500 кВт</td>
+                    <td class="yes">Да</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>-</td>
+                    <td class="location">Санкт-Петербург, Курляндская ул., 49</td>
+                    <td class="status-call">перезвонить</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/proizvodstvo_50_m_7481442604" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>Сергей</td>
+                    <td>Производство, 1000 м2</td>
+                    <td class="price">70 000</td>
+                    <td class="price">70</td>
+                    <td class="area">1000 м²</td>
+                    <td>4 м</td>
+                    <td>25 кВт</td>
+                    <td class="yes">Да</td>
+                    <td>Прямая</td>
+                    <td>Со двора</td>
+                    <td>Нет</td>
+                    <td class="location">Ленинградская обл., Ломоносовский р-н, Виллозское городское поселение, территория Южная часть производственной зоны Горелово, Волхонское ш., 4к6</td>
+                    <td class="status-call">перезвонить</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/proizvodstvo_1000_m2_7517655065" target="_blank" class="link">Открыть</a></td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td>Пользователь</td>
+                    <td>Ангар 12х12 под склад или производство</td>
+                    <td class="price">70 000</td>
+                    <td class="price">486</td>
+                    <td class="area">144 м²</td>
+                    <td>5 м</td>
+                    <td>15 кВт</td>
+                    <td class="yes">Да</td>
+                    <td>Прямая</td>
+                    <td>С улицы</td>
+                    <td>-</td>
+                    <td class="location">Ленинградская обл., Тосненский р-н, Никольское городское поселение, Никольское, Ульяновское ш., 1Л</td>
+                    <td class="status-call">ПОЗВОНИТЬ</td>
+                    <td><a href="https://www.avito.ru/sankt-peterburg/kommercheskaya_nedvizhimost/angar_12h12_pod_sklad_ili_proizvodstvo_7557455531" target="_blank" class="link">Открыть</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Простой скрипт для подсчета статистики
+        function updateStats() {
+            const rows = document.querySelectorAll('tbody tr');
+            const totalCount = rows.length;
+            
+            let totalPrice = 0;
+            let totalArea = 0;
+            
+            rows.forEach(row => {
+                const price = parseInt(row.cells[3].textContent.replace(/\s/g, ''));
+                const area = parseInt(row.cells[5].textContent.replace(/\s*м²/g, ''));
+                
+                if (!isNaN(price)) totalPrice += price;
+                if (!isNaN(area)) totalArea += area;
+            });
+            
+            const avgPrice = totalCount > 0 ? Math.round(totalPrice / totalCount) : 0;
+            
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('avg-price').textContent = avgPrice.toLocaleString();
+            document.getElementById('total-area').textContent = totalArea.toLocaleString();
+        }
+        
+        // Обновляем статистику при загрузке
+        updateStats();
+    </script>
+</body>
+</html> 

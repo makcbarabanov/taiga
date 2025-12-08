@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Доходы</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <nav class="nav">
+                <a href="taiga.html" class="nav-link">Объекты</a>
+                <a href="income.html" class="nav-link active">Доходы</a>
+                <a href="expenses.html" class="nav-link">Расходы</a>
+                <a href="cash.html" class="nav-link">Касса</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Actions -->
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openAddIncomeModal()">+ Добавить доход</button>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <select id="filter-project" onchange="filterIncome()">
+                    <option value="">Все объекты</option>
+                </select>
+                <input type="month" id="filter-month" onchange="filterIncome()">
+            </div>
+
+            <!-- Income Table -->
+            <div class="table-container">
+                <table class="table" id="income-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Клиент</th>
+                            <th>Объект</th>
+                            <th>Сумма</th>
+                            <th>Кошелёк</th>
+                            <th>Комментарий</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="income-tbody">
+                        <!-- Данные будут загружены через JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary -->
+            <div class="summary">
+                <div class="summary-item">
+                    <span class="summary-label">Всего доходов:</span>
+                    <span class="summary-value" id="total-income">0.00 ₽</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add Income -->
+    <div id="add-income-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddIncomeModal()">&times;</span>
+            <h2>Добавить доход</h2>
+            <form id="add-income-form">
+                <div class="form-group">
+                    <label for="income-project">Объект *</label>
+                    <select id="income-project" name="project_id" required>
+                        <option value="">Выберите объект</option>
+                        <!-- Заполнится через JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="income-date">Дата *</label>
+                    <input type="date" id="income-date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="income-amount">Сумма *</label>
+                    <input type="number" id="income-amount" name="amount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="income-wallet">Кошелёк</label>
+                    <input type="text" id="income-wallet" name="wallet">
+                </div>
+                <div class="form-group">
+                    <label for="income-comment">Комментарий</label>
+                    <textarea id="income-comment" name="comment" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddIncomeModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/income.js"></script>
+</body>
+</html>
+
+

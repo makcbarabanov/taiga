@@ -1,0 +1,232 @@
+/* ===========================================
+   Стили для страницы расходов
+   =========================================== */
+
+.editable-table-container {
+    position: relative;
+}
+
+.editable-table {
+    table-layout: auto;
+    width: 100%;
+}
+
+/* Ширина колонок */
+.editable-table .col-id {
+    width: 35px;
+    min-width: 35px;
+    max-width: 40px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.editable-table .col-date {
+    width: 100px;
+    min-width: 100px;
+}
+
+/* Убираем календарный виджет у input[type="date"] */
+.editable-table .col-date input[type="date"] {
+    position: relative;
+}
+
+.editable-table .col-date input[type="date"]::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+}
+
+.editable-table .col-date input[type="date"]::-webkit-inner-spin-button {
+    display: none;
+}
+
+.editable-table .col-date input[type="date"]::-webkit-clear-button {
+    display: none;
+}
+
+.editable-table .col-category {
+    width: 120px;
+    min-width: 120px;
+}
+
+.editable-table .col-subcategory {
+    width: 250px;
+    min-width: 200px;
+    max-width: 300px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+.editable-table .col-subcategory .editable-cell {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 40px;
+    resize: vertical;
+}
+
+.editable-table .col-subcategory textarea.editable-cell {
+    width: 100%;
+    min-height: 40px;
+    max-height: 100px;
+    padding: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    overflow-y: auto;
+}
+
+.editable-table .col-unit {
+    width: auto;
+    min-width: 50px;
+    max-width: 70px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.editable-table .col-quantity {
+    width: auto;
+    min-width: 60px;
+    max-width: 80px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.editable-table .col-price {
+    width: auto;
+    min-width: 80px;
+    max-width: 120px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.editable-table .col-amount {
+    width: 120px;
+    min-width: 120px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.editable-table .col-client {
+    width: 120px;
+    min-width: 120px;
+}
+
+.editable-table .col-project {
+    width: 150px;
+    min-width: 150px;
+}
+
+.editable-table .col-shop {
+    width: 150px;
+    min-width: 150px;
+}
+
+.editable-table .col-comment {
+    width: 200px;
+    min-width: 200px;
+}
+
+.editable-table td {
+    position: relative;
+    padding: 8px;
+}
+
+.editable-cell {
+    width: 100%;
+    min-height: 30px;
+    padding: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: text;
+    transition: all 0.2s;
+}
+
+.editable-cell:hover {
+    background: #f0f0f0;
+    border-color: #ddd;
+}
+
+.editable-cell:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: -2px;
+    background: white;
+    border-color: var(--secondary-color);
+    z-index: 10;
+}
+
+.editable-cell.changed {
+    background: #fff3cd;
+}
+
+.editable-cell.saving {
+    background: #d1ecf1;
+}
+
+.editable-cell.error {
+    background: #f8d7da;
+    border-color: var(--danger-color);
+}
+
+/* Select в ячейке */
+.editable-cell select {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.editable-cell select:focus {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: -2px;
+}
+
+/* Кнопка удаления строки */
+.btn-delete-row {
+    padding: 4px 8px;
+    font-size: 12px;
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-delete-row:hover {
+    background: #c82333;
+}
+
+/* Индикатор сохранения */
+.save-indicator {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: var(--success-color);
+    color: white;
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    display: none;
+    z-index: 1000;
+}
+
+.save-indicator.show {
+    display: block;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+

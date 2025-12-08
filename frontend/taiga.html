@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Объекты</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <nav class="nav">
+                <a href="taiga.html" class="nav-link active">Объекты</a>
+                <a href="income.html" class="nav-link">Доходы</a>
+                <a href="expenses.html" class="nav-link">Расходы</a>
+                <a href="cash.html" class="nav-link">Касса</a>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Actions -->
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openAddProjectModal()">+ Добавить объект</button>
+                <button class="btn btn-secondary" onclick="openAddClientModal()">+ Добавить клиента</button>
+            </div>
+
+            <!-- Projects Table -->
+            <div class="table-container">
+                <table class="table" id="projects-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Клиент</th>
+                            <th>Объект</th>
+                            <th>Статус</th>
+                            <th>Дата начала</th>
+                            <th>Дата окончания</th>
+                            <th>План прибыли</th>
+                            <th>Факт прибыли</th>
+                            <th>План доходов</th>
+                            <th>Факт доходов</th>
+                            <th>План расходов</th>
+                            <th>Факт расходов</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-tbody">
+                        <!-- Данные будут загружены через JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add Project -->
+    <div id="add-project-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddProjectModal()">&times;</span>
+            <h2>Добавить объект</h2>
+            <form id="add-project-form">
+                <div class="form-group">
+                    <label for="project-client">Клиент *</label>
+                    <select id="project-client" name="client_id" required>
+                        <option value="">Выберите клиента</option>
+                        <!-- Заполнится через JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="project-name">Название объекта *</label>
+                    <input type="text" id="project-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-status">Статус</label>
+                    <select id="project-status" name="status">
+                        <option value="В работе">В работе</option>
+                        <option value="В кассе">В кассе</option>
+                        <option value="Завершён">Завершён</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="project-start-date">Дата начала</label>
+                    <input type="date" id="project-start-date" name="start_date">
+                </div>
+                <div class="form-group">
+                    <label for="project-end-date">Дата окончания</label>
+                    <input type="date" id="project-end-date" name="end_date">
+                </div>
+                <div class="form-group">
+                    <label for="project-planned-profit">Плановая прибыль</label>
+                    <input type="number" id="project-planned-profit" name="planned_profit" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label for="project-notes">Заметки</label>
+                    <textarea id="project-notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddProjectModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Client -->
+    <div id="add-client-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddClientModal()">&times;</span>
+            <h2>Добавить клиента</h2>
+            <form id="add-client-form">
+                <div class="form-group">
+                    <label for="client-name">Имя клиента *</label>
+                    <input type="text" id="client-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="client-phone">Телефон</label>
+                    <input type="text" id="client-phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="client-email">Email</label>
+                    <input type="email" id="client-email" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="client-address">Адрес</label>
+                    <textarea id="client-address" name="address" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client-notes">Заметки</label>
+                    <textarea id="client-notes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddClientModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/taiga.js"></script>
+</body>
+</html>
+
+

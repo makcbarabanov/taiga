@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ТАйга - Варианты логотипов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .tab:hover {
+            background: #1e3c72;
+            color: white;
+        }
+
+        .variant-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .variant-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .variant-btn.active {
+            background: #00B0F0;
+            color: white;
+            border-color: #00B0F0;
+        }
+
+        .variant-btn:hover {
+            background: #0090c0;
+            color: white;
+            border-color: #0090c0;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fafafa;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        canvas {
+            border-radius: 10px;
+        }
+
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .info h3 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ТАйга - Коллекция логотипов</h1>
+        <p class="subtitle">11 вариантов на основе Фибоначчи + 7 вариантов на основе y=3x-1</p>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchCategory('fibonacci')">Фибоначчи (11 вариантов)</button>
+            <button class="tab" onclick="switchCategory('formula')">y=3x-1 (7 вариантов)</button>
+        </div>
+
+        <div id="fibonacci-selector" class="variant-selector">
+            <button class="variant-btn active" onclick="selectVariant(1)">Вариант 1</button>
+            <button class="variant-btn" onclick="selectVariant(2)">Вариант 2</button>
+            <button class="variant-btn" onclick="selectVariant(3)">Вариант 3</button>
+            <button class="variant-btn" onclick="selectVariant(4)">Вариант 4</button>
+            <button class="variant-btn" onclick="selectVariant(5)">Вариант 5</button>
+            <button class="variant-btn" onclick="selectVariant(6)">Вариант 6</button>
+            <button class="variant-btn" onclick="selectVariant(7)">Вариант 7</button>
+            <button class="variant-btn" onclick="selectVariant(8)">Вариант 8</button>
+            <button class="variant-btn" onclick="selectVariant(9)">Вариант 9</button>
+            <button class="variant-btn" onclick="selectVariant(10)">Вариант 10</button>
+            <button class="variant-btn" onclick="selectVariant(11)">Вариант 11</button>
+        </div>
+
+        <div id="formula-selector" class="variant-selector" style="display: none;">
+            <button class="variant-btn active" onclick="selectVariant(12)">Вариант 1</button>
+            <button class="variant-btn" onclick="selectVariant(13)">Вариант 2</button>
+            <button class="variant-btn" onclick="selectVariant(14)">Вариант 3</button>
+            <button class="variant-btn" onclick="selectVariant(15)">Вариант 4</button>
+            <button class="variant-btn" onclick="selectVariant(16)">Вариант 5</button>
+            <button class="variant-btn" onclick="selectVariant(17)">Вариант 6</button>
+            <button class="variant-btn" onclick="selectVariant(18)">Вариант 7</button>
+        </div>
+
+        <div class="logo-container">
+            <canvas id="logoCanvas" width="800" height="600"></canvas>
+        </div>
+
+        <div class="info">
+            <h3 id="info-title">Вариант 1 - Классическая спираль</h3>
+            <p id="info-description">Буквы "ТАйга" расположены по классической спирали Фибоначчи с квадратами и дугами.</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('logoCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let currentCategory = 'fibonacci';
+        let currentVariant = 1;
+        const PHI = 1.618033988749895;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Последовательность Фибоначчи
+        function fibonacci(n) {
+            if (n <= 1) return n;
+            let a = 0, b = 1;
+            for (let i = 2; i <= n; i++) {
+                [a, b] = [b, a + b];
+            }
+            return b;
+        }
+        
+        // Формула y=3x-1
+        function formula(x) {
+            return 3 * x - 1;
+        }
+        
+        // ВАРИАНТЫ ФИБОНАЧЧИ (1-11)
+        
+        function drawFibonacci1() {
+            // Классическая спираль с буквами
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Спираль
+            let x = centerX - 100;
+            let y = centerY - 50;
+            const scale = 4;
+            
+            for (let i = 1; i <= 7; i++) {
+                const fib = fibonacci(i);
+                const size = fib * scale;
+                ctx.fillStyle = `hsla(${i * 45}, 70%, 80%, 0.15)`;
+                ctx.strokeStyle = `hsla(${i * 45}, 70%, 50%, 0.4)`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.rect(x, y, size, size);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(x + size, y + size, size, Math.PI, Math.PI * 1.5);
+                ctx.stroke();
+                
+                if (i % 4 === 1) x += size;
+                else if (i % 4 === 2) { y += size; x -= fibonacci(i - 1) * scale; }
+                else if (i % 4 === 3) { x -= size; y -= fibonacci(i - 1) * scale; }
+                else y -= size;
+            }
+            
+            // Буквы
+            const text = "ТАйга";
+            const positions = [
+                { x: centerX - 20, y: centerY - 100, size: 70, angle: 0 },
+                { x: centerX + 80, y: centerY - 60, size: 60, angle: 20 },
+                { x: centerX + 120, y: centerY + 20, size: 55, angle: 40 },
+                { x: centerX + 60, y: centerY + 100, size: 50, angle: 60 },
+                { x: centerX - 40, y: centerY + 120, size: 45, angle: 80 }
+            ];
+            
+            text.split('').forEach((letter, i) => {
+                if (i < positions.length) {
+                    const pos = positions[i];
+                    ctx.save();
+                    ctx.translate(pos.x, pos.y);
+                    ctx.rotate((pos.angle * Math.PI) / 180);
+                    const gradient = ctx.createLinearGradient(-pos.size/2, -pos.size/2, pos.size/2, pos.size/2);
+                    gradient.addColorStop(0, '#00B0F0');
+                    gradient.addColorStop(1, '#1e3c72');
+                    ctx.fillStyle = gradient;
+                    ctx.font = `bold ${pos.size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(letter, 0, 0);
+                    ctx.restore();
+                }
+            });
+        }
+        
+        function drawFibonacci2() {
+            // Вертикальная композиция
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [34, 21, 13, 8, 5];
+            let startY = centerY - 150;
+            
+            text.split('').forEach((letter, i) => {
+                const size = fibSizes[i] * 2.5;
+                const x = centerX;
+                const y = startY + i * 80;
+                
+                // Круг Фибоначчи
+                ctx.fillStyle = `hsla(${i * 60}, 70%, 75%, 0.3)`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Буква
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+            });
+        }
+        
+        function drawFibonacci3() {
+            // Горизонтальная волна
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [21, 13, 8, 5, 3];
+            let startX = centerX - 200;
+            
+            text.split('').forEach((letter, i) => {
+                const size = fibSizes[i] * 3;
+                const x = startX + i * 120;
+                const y = centerY + Math.sin(i * 0.8) * 60;
+                
+                // Квадрат
+                ctx.fillStyle = `hsla(${i * 72}, 70%, 80%, 0.2)`;
+                ctx.fillRect(x - size/2, y - size/2, size, size);
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x - size/2, y - size/2, size, size);
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+            });
+        }
+        
+        function drawFibonacci4() {
+            // Спираль из кругов
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            let angle = 0;
+            let radius = 80;
+            
+            text.split('').forEach((letter, i) => {
+                const fib = fibonacci(i + 3);
+                const size = fib * 2.5;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                ctx.fillStyle = `hsla(${i * 72}, 70%, 75%, 0.25)`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+                
+                angle += Math.PI / 2.5;
+                radius += fib * 1.5;
+            });
+        }
+        
+        function drawFibonacci5() {
+            // Золотой прямоугольник
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            let width = 200;
+            let height = width / PHI;
+            let x = centerX - width/2;
+            let y = centerY - height/2;
+            
+            // Рисуем золотые прямоугольники
+            for (let i = 0; i < 5; i++) {
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, width, height);
+                
+                if (i < text.length) {
+                    ctx.fillStyle = '#00B0F0';
+                    ctx.font = `bold ${40 - i * 5}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text[i], x + width/2, y + height/2);
+                }
+                
+                const newWidth = height;
+                const newHeight = width - height;
+                x += width - newWidth;
+                y += height;
+                width = newWidth;
+                height = newHeight;
+            }
+        }
+        
+        function drawFibonacci6() {
+            // Модульная сетка
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const grid = [5, 8, 13, 21, 34];
+            let x = centerX - 150;
+            let y = centerY - 100;
+            
+            text.split('').forEach((letter, i) => {
+                const cellSize = grid[i] * 2;
+                const cols = Math.ceil(Math.sqrt(grid[i]));
+                const rows = Math.ceil(grid[i] / cols);
+                
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols && (r * cols + c) < grid[i]; c++) {
+                        ctx.fillStyle = `hsla(${i * 60}, 70%, 70%, 0.4)`;
+                        ctx.fillRect(x + c * 8, y + r * 8, 7, 7);
+                    }
+                }
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${cellSize}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x + (cols * 8) / 2, y + 60);
+                
+                x += cols * 8 + 40;
+            });
+        }
+        
+        function drawFibonacci7() {
+            // Радиальная композиция
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [55, 34, 21, 13, 8];
+            
+            text.split('').forEach((letter, i) => {
+                const angle = (i * Math.PI * 2) / text.length;
+                const radius = 120;
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const size = fibSizes[i] * 0.8;
+                
+                // Линия к центру
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Буква в круге
+                ctx.fillStyle = `hsla(${i * 72}, 70%, 80%, 0.3)`;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+            });
+        }
+        
+        function drawFibonacci8() {
+            // Лестница Фибоначчи
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [13, 21, 34, 55, 89];
+            let x = centerX - 200;
+            let y = centerY + 100;
+            
+            text.split('').forEach((letter, i) => {
+                const size = fibSizes[i] * 0.6;
+                const stepX = fibSizes[i] * 1.5;
+                const stepY = -fibSizes[i] * 1.2;
+                
+                // Ступенька
+                ctx.fillStyle = `hsla(${i * 60}, 70%, 75%, 0.3)`;
+                ctx.fillRect(x, y - size, stepX, size);
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y - size, stepX, size);
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(letter, x + 10, y - 5);
+                
+                x += stepX;
+                y += stepY;
+            });
+        }
+        
+        function drawFibonacci9() {
+            // Концентрические круги
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [8, 13, 21, 34, 55];
+            
+            text.split('').forEach((letter, i) => {
+                const radius = fibSizes[i] * 1.5;
+                const angle = (i * Math.PI * 2) / text.length;
+                const x = centerX + Math.cos(angle) * 150;
+                const y = centerY + Math.sin(angle) * 150;
+                
+                // Концентрические круги
+                for (let j = 0; j <= i; j++) {
+                    const r = fibSizes[j] * 1.5;
+                    ctx.strokeStyle = `hsla(${j * 60}, 70%, 60%, 0.4)`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${radius}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+            });
+        }
+        
+        function drawFibonacci10() {
+            // Геометрический паттерн
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const fibSizes = [5, 8, 13, 21, 34];
+            let x = centerX - 180;
+            let y = centerY;
+            
+            text.split('').forEach((letter, i) => {
+                const size = fibSizes[i] * 2.5;
+                
+                // Шестиугольник
+                ctx.beginPath();
+                for (let j = 0; j < 6; j++) {
+                    const angle = (j * Math.PI * 2) / 6;
+                    const px = x + Math.cos(angle) * size;
+                    const py = y + Math.sin(angle) * size;
+                    if (j === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fillStyle = `hsla(${i * 72}, 70%, 80%, 0.25)`;
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+                
+                x += size * 1.8;
+            });
+        }
+        
+        function drawFibonacci11() {
+            // Минималистичный спиральный текст
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            let angle = 0;
+            let radius = 50;
+            
+            // Тонкая спираль
+            ctx.strokeStyle = '#00B0F0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i < 200; i++) {
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+                angle += 0.1;
+                radius += 0.3;
+            }
+            ctx.stroke();
+            
+            // Буквы на спирали
+            angle = 0;
+            radius = 50;
+            text.split('').forEach((letter, i) => {
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                const size = (34 - i * 5) * 1.5;
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, x, y);
+                
+                angle += Math.PI / 2.5;
+                radius += 40;
+            });
+        }
+        
+        // ВАРИАНТЫ ФОРМУЛЫ y=3x-1 (12-18)
+        
+        function drawFormula1() {
+            // График функции с буквами
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Оси координат
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(100, centerY);
+            ctx.lineTo(700, centerY);
+            ctx.moveTo(centerX, 100);
+            ctx.lineTo(centerX, 500);
+            ctx.stroke();
+            
+            // График y=3x-1
+            ctx.strokeStyle = '#00B0F0';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let x = -5; x <= 5; x += 0.1) {
+                const y = formula(x);
+                const px = centerX + x * 50;
+                const py = centerY - y * 10;
+                if (x === -5) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            
+            // Буквы на точках
+            const text = "ТАйга";
+            const xValues = [-2, -1, 0, 1, 2];
+            text.split('').forEach((letter, i) => {
+                if (i < xValues.length) {
+                    const x = xValues[i];
+                    const y = formula(x);
+                    const px = centerX + x * 50;
+                    const py = centerY - y * 10;
+                    
+                    ctx.fillStyle = '#00B0F0';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 25, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 30px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(letter, px, py);
+                }
+            });
+        }
+        
+        function drawFormula2() {
+            // Вертикальные столбцы
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            let startX = centerX - 200;
+            
+            text.split('').forEach((letter, i) => {
+                const x = xValues[i];
+                const y = formula(x);
+                const width = 60;
+                const height = y * 8;
+                const px = startX + i * 100;
+                const py = centerY + 150;
+                
+                // Столбец
+                ctx.fillStyle = `hsla(${i * 60}, 70%, 70%, 0.6)`;
+                ctx.fillRect(px - width/2, py - height, width, height);
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(px - width/2, py - height, width, height);
+                
+                // Значение
+                ctx.fillStyle = '#333';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`y=${y}`, px, py - height - 10);
+                
+                // Буква
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = 'bold 40px Arial';
+                ctx.fillText(letter, px, py + 30);
+            });
+        }
+        
+        function drawFormula3() {
+            // Точки на линии
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            
+            // Линия
+            ctx.strokeStyle = '#00B0F0';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const firstX = centerX - 150;
+            const firstY = centerY - formula(1) * 15;
+            const lastX = centerX + 150;
+            const lastY = centerY - formula(5) * 15;
+            ctx.moveTo(firstX, firstY);
+            ctx.lineTo(lastX, lastY);
+            ctx.stroke();
+            
+            // Точки с буквами
+            text.split('').forEach((letter, i) => {
+                if (i < xValues.length) {
+                    const x = xValues[i];
+                    const y = formula(x);
+                    const px = centerX - 150 + (i * 75);
+                    const py = centerY - y * 15;
+                    
+                    ctx.fillStyle = '#00B0F0';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 35px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(letter, px, py);
+                }
+            });
+        }
+        
+        function drawFormula4() {
+            // Волновая композиция
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            let startX = centerX - 200;
+            
+            text.split('').forEach((letter, i) => {
+                const x = xValues[i];
+                const y = formula(x);
+                const px = startX + i * 100;
+                const py = centerY + Math.sin(i) * 50 - y * 3;
+                const size = 30 + y * 2;
+                
+                // Волна
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                ctx.fillStyle = `hsla(${i * 72}, 70%, 75%, 0.3)`;
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, px, py);
+            });
+        }
+        
+        function drawFormula5() {
+            // Геометрические фигуры
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            let startX = centerX - 200;
+            
+            text.split('').forEach((letter, i) => {
+                const x = xValues[i];
+                const y = formula(x);
+                const px = startX + i * 100;
+                const py = centerY;
+                const size = 20 + y * 2;
+                
+                // Треугольник
+                ctx.beginPath();
+                ctx.moveTo(px, py - size);
+                ctx.lineTo(px - size, py + size);
+                ctx.lineTo(px + size, py + size);
+                ctx.closePath();
+                ctx.fillStyle = `hsla(${i * 60}, 70%, 75%, 0.4)`;
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, px, py);
+            });
+        }
+        
+        function drawFormula6() {
+            // Сетка значений
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            let startX = centerX - 200;
+            let startY = centerY - 100;
+            
+            text.split('').forEach((letter, i) => {
+                const x = xValues[i];
+                const y = formula(x);
+                const px = startX + i * 100;
+                const py = startY;
+                
+                // Квадрат сетки
+                const cellSize = 50;
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px - cellSize/2, py - cellSize/2, cellSize, cellSize);
+                
+                // Значение x
+                ctx.fillStyle = '#666';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`x=${x}`, px, py - 20);
+                
+                // Значение y
+                ctx.fillText(`y=${y}`, px, py);
+                
+                // Буква
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = 'bold 30px Arial';
+                ctx.fillText(letter, px, py + 30);
+            });
+        }
+        
+        function drawFormula7() {
+            // Абстрактная композиция
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const text = "ТАйга";
+            const xValues = [1, 2, 3, 4, 5];
+            let angle = 0;
+            
+            text.split('').forEach((letter, i) => {
+                const x = xValues[i];
+                const y = formula(x);
+                const radius = 100 + y * 5;
+                const px = centerX + Math.cos(angle) * radius;
+                const py = centerY + Math.sin(angle) * radius;
+                const size = 25 + y * 2;
+                
+                // Спиральные линии
+                ctx.strokeStyle = `hsla(${i * 60}, 70%, 60%, 0.5)`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                
+                // Буква в круге
+                ctx.fillStyle = `hsla(${i * 60}, 70%, 75%, 0.4)`;
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#00B0F0';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#00B0F0';
+                ctx.font = `bold ${size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(letter, px, py);
+                
+                angle += Math.PI * 2 / text.length;
+            });
+        }
+        
+        // Управление
+        
+        const descriptions = {
+            1: { title: "Вариант 1 - Классическая спираль", desc: "Буквы расположены по классической спирали Фибоначчи с квадратами и дугами." },
+            2: { title: "Вариант 2 - Вертикальная композиция", desc: "Буквы в кругах разного размера, расположенные вертикально по числам Фибоначчи." },
+            3: { title: "Вариант 3 - Горизонтальная волна", desc: "Буквы в квадратах, образующие волнообразную композицию." },
+            4: { title: "Вариант 4 - Спираль из кругов", desc: "Буквы расположены по спирали в кругах, размеры которых основаны на Фибоначчи." },
+            5: { title: "Вариант 5 - Золотой прямоугольник", desc: "Композиция из золотых прямоугольников с буквами внутри." },
+            6: { title: "Вариант 6 - Модульная сетка", desc: "Каждая буква представлена модульной сеткой из точек по числу Фибоначчи." },
+            7: { title: "Вариант 7 - Радиальная композиция", desc: "Буквы расположены по кругу с линиями к центру." },
+            8: { title: "Вариант 8 - Лестница Фибоначчи", desc: "Буквы на ступеньках, размеры которых соответствуют последовательности." },
+            9: { title: "Вариант 9 - Концентрические круги", desc: "Буквы в концентрических кругах разных размеров." },
+            10: { title: "Вариант 10 - Геометрический паттерн", desc: "Буквы в шестиугольниках, размеры основаны на Фибоначчи." },
+            11: { title: "Вариант 11 - Минималистичный спиральный текст", desc: "Тонкая спираль с буквами, расположенными вдоль неё." },
+            12: { title: "Вариант 1 - График функции", desc: "Буквы на точках графика функции y=3x-1 с координатными осями." },
+            13: { title: "Вариант 2 - Вертикальные столбцы", desc: "Столбцы разной высоты, соответствующие значениям функции." },
+            14: { title: "Вариант 3 - Точки на линии", desc: "Буквы в точках, расположенных на прямой линии функции." },
+            15: { title: "Вариант 4 - Волновая композиция", desc: "Буквы в волновых кругах, размеры зависят от значений функции." },
+            16: { title: "Вариант 5 - Геометрические фигуры", desc: "Буквы в треугольниках, размеры основаны на формуле." },
+            17: { title: "Вариант 6 - Сетка значений", desc: "Буквы в ячейках сетки с отображением значений x и y." },
+            18: { title: "Вариант 7 - Абстрактная композиция", desc: "Радиальная композиция с буквами, размеры зависят от значений функции." }
+        };
+        
+        const drawFunctions = {
+            1: drawFibonacci1, 2: drawFibonacci2, 3: drawFibonacci3, 4: drawFibonacci4,
+            5: drawFibonacci5, 6: drawFibonacci6, 7: drawFibonacci7, 8: drawFibonacci8,
+            9: drawFibonacci9, 10: drawFibonacci10, 11: drawFibonacci11,
+            12: drawFormula1, 13: drawFormula2, 14: drawFormula3, 15: drawFormula4,
+            16: drawFormula5, 17: drawFormula6, 18: drawFormula7
+        };
+        
+        function selectVariant(variant) {
+            currentVariant = variant;
+            
+            // Обновляем активные кнопки
+            document.querySelectorAll('.variant-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Рисуем вариант
+            if (drawFunctions[variant]) {
+                drawFunctions[variant]();
+            }
+            
+            // Обновляем описание
+            if (descriptions[variant]) {
+                document.getElementById('info-title').textContent = descriptions[variant].title;
+                document.getElementById('info-description').textContent = descriptions[variant].desc;
+            }
+        }
+        
+        function switchCategory(category) {
+            currentCategory = category;
+            
+            // Обновляем табы
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Показываем/скрываем селекторы
+            if (category === 'fibonacci') {
+                document.getElementById('fibonacci-selector').style.display = 'flex';
+                document.getElementById('formula-selector').style.display = 'none';
+                currentVariant = 1;
+                selectVariant(1);
+            } else {
+                document.getElementById('fibonacci-selector').style.display = 'none';
+                document.getElementById('formula-selector').style.display = 'flex';
+                currentVariant = 12;
+                selectVariant(12);
+            }
+        }
+        
+        // Инициализация
+        drawFibonacci1();
+    </script>
+</body>
+</html>
