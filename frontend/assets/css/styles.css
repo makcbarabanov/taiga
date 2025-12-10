@@ -30,16 +30,22 @@ body {
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
 }
 
 /* Header */
 .header {
     background: white;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 0;
     box-shadow: var(--shadow);
     margin-bottom: 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+    margin-top: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header h1 {
@@ -67,6 +73,42 @@ body {
 .nav-link.active {
     background: var(--secondary-color);
     color: white;
+}
+
+/* Стили для ссылки кассы в навигации */
+#cash-nav-link {
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+/* Зелёный цвет - когда calculated = actual */
+#cash-nav-link.cash-match {
+    color: #27ae60 !important; /* Зелёный цвет */
+}
+
+#cash-nav-link.cash-match:hover {
+    background: rgba(39, 174, 96, 0.1) !important;
+    color: #229954 !important;
+}
+
+/* Красный цвет - когда calculated ≠ actual */
+#cash-nav-link.cash-mismatch {
+    color: #e74c3c !important; /* Красный цвет */
+}
+
+#cash-nav-link.cash-mismatch:hover {
+    background: rgba(231, 76, 60, 0.1) !important;
+    color: #c0392b !important;
+}
+
+#cash-nav-link.active {
+    background: #27ae60 !important;
+    color: white !important;
+}
+
+#cash-nav-link.active.cash-mismatch {
+    background: #e74c3c !important;
+    color: white !important;
 }
 
 /* Actions */
@@ -145,6 +187,26 @@ body {
 
 .table tbody tr:last-child td {
     border-bottom: none;
+}
+
+/* Стили для строк кассы */
+.table tbody tr.cash-past {
+    opacity: 0.6;
+    color: #666;
+}
+
+.table tbody tr.cash-past td {
+    color: #666;
+}
+
+.table tbody tr.cash-today {
+    opacity: 1;
+    font-weight: 500;
+    background-color: #f0f8ff;
+}
+
+.table tbody tr.cash-today:hover {
+    background-color: #e0f0ff;
 }
 
 /* Modal */
@@ -265,5 +327,6 @@ body {
 .empty-state p {
     margin-top: 10px;
 }
+
 
 

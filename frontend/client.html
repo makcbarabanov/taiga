@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taiga - Проект клиента</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/client.css">
 </head>
@@ -16,7 +17,7 @@
                 <a href="taiga.html" class="nav-link">Объекты</a>
                 <a href="income.html" class="nav-link">Доходы</a>
                 <a href="expenses.html" class="nav-link">Расходы</a>
-                <a href="cash.html" class="nav-link">Касса</a>
+                <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
             </nav>
         </header>
 
@@ -29,8 +30,8 @@
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('stat')">Стат</button>
-            <button class="tab-btn" onclick="showTab('works')">Работы</button>
+            <button class="tab-btn" onclick="showTab('stat')">Стат</button>
+            <button class="tab-btn active" onclick="showTab('works')">Работы</button>
             <button class="tab-btn" onclick="showTab('materials')">Снаб</button>
             <button class="tab-btn" onclick="showTab('journal')">Журнал</button>
             <button class="tab-btn" onclick="showTab('timesheet')">Табель</button>
@@ -39,7 +40,7 @@
         <!-- Tab Content -->
         <main class="main">
             <!-- Tab: Статистика -->
-            <div id="tab-stat" class="tab-content active">
+            <div id="tab-stat" class="tab-content">
                 <div class="tab-header">
                     <h2>Статистика по дням</h2>
                     <button class="btn btn-primary" onclick="openAddStatModal()">+ Добавить запись</button>
@@ -63,7 +64,7 @@
             </div>
 
             <!-- Tab: Работы -->
-            <div id="tab-works" class="tab-content">
+            <div id="tab-works" class="tab-content active">
                 <div class="tab-header">
                     <h2>Опись работ</h2>
                     <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
@@ -76,16 +77,11 @@
                                 <th>Наименование работы</th>
                                 <th>Ед. изм.</th>
                                 <th>Кол-во</th>
-                                <th>Цена за ед.</th>
-                                <th>Стоимость</th>
                                 <th>Прогресс (%)</th>
-                                <th>Выполнено</th>
-                                <th>Статус</th>
-                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="works-tbody">
-                            <tr><td colspan="10" class="loading">Загрузка...</td></tr>
+                            <tr><td colspan="5" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -213,8 +209,10 @@
     <div id="modals-container"></div>
 
     <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
     <script src="assets/js/client.js"></script>
 </body>
 </html>
+
 
 

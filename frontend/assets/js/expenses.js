@@ -21,38 +21,46 @@ function formatNumberInput(num) {
 }
 
 // Форматирование цены с разделителями тысяч (для отображения)
+// Правила: >= 1 рубля - без десятичных, < 1 рубля - с десятичными, >= 1000 - с разделителями
 function formatPrice(num) {
     if (num === null || num === undefined) return '0';
     const n = parseFloat(num);
     if (isNaN(n)) return '0';
-    // Форматируем с разделителями тысяч, без .00 если целое
-    if (n % 1 === 0) {
+    
+    // Если цена меньше 1 рубля - показываем с десятичными
+    if (n < 1) {
         return new Intl.NumberFormat('ru-RU', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         }).format(n);
     }
+    
+    // Если цена >= 1 рубля - без десятичных, с разделителями тысяч
     return new Intl.NumberFormat('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
     }).format(n);
 }
 
 // Форматирование цены для input (с разделителями тысяч)
+// Правила: >= 1 рубля - без десятичных, < 1 рубля - с десятичными, >= 1000 - с разделителями
 function formatPriceInput(num) {
     if (num === null || num === undefined || num === '') return '';
     const n = parseFloat(num);
     if (isNaN(n)) return '';
-    // Форматируем с разделителями тысяч
-    if (n % 1 === 0) {
+    
+    // Если цена меньше 1 рубля - показываем с десятичными
+    if (n < 1) {
         return new Intl.NumberFormat('ru-RU', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
         }).format(n);
     }
+    
+    // Если цена >= 1 рубля - без десятичных, с разделителями тысяч
     return new Intl.NumberFormat('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
     }).format(n);
 }
 
@@ -80,6 +88,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadShops();
     await loadUnits();
     await loadExpenses();
+    populateClientFilter();
+    populateShopFilter();
+    populateSubcategoryFilter();
 });
 
 // Загрузка проектов
@@ -136,8 +147,36 @@ async function loadExpenses() {
         tbody.innerHTML = '<tr><td colspan="13" class="loading">Загрузка...</td></tr>';
         
         expenses = await expensesAPI.getAll();
+        console.log('Загружено расходов:', expenses.length);
+        
+        // Автоматически заполняем единицы измерения и цены для строк, где они не заполнены
+        const hasChanges = await autoFillUnitsAndPrices();
+        
+        // Если были изменения, перезагружаем данные
+        if (hasChanges) {
+            expenses = await expensesAPI.getAll();
+            console.log('Перезагружено расходов после автозаполнения:', expenses.length);
+        }
+        
+        // Очищаем фильтры перед отображением (чтобы показать все записи)
+        document.getElementById('filter-category').value = '';
+        document.getElementById('filter-subcategory').value = '';
+        document.getElementById('filter-price-min').value = '';
+        document.getElementById('filter-price-max').value = '';
+        document.getElementById('filter-amount-min').value = '';
+        document.getElementById('filter-amount-max').value = '';
+        document.getElementById('filter-client').value = '';
+        document.getElementById('filter-project').value = '';
+        document.getElementById('filter-shop').value = '';
+        document.getElementById('filter-month').value = '';
+        
         renderExpenses();
         updateSummary();
+        
+        // Обновляем фильтр подкатегорий после загрузки данных
+        if (typeof populateSubcategoryFilter === 'function') {
+            populateSubcategoryFilter();
+        }
     } catch (error) {
         console.error('Ошибка загрузки расходов:', error);
         document.getElementById('expenses-tbody').innerHTML = 
@@ -145,15 +184,152 @@ async function loadExpenses() {
     }
 }
 
+// Автоматическое заполнение единиц измерения и цен для строк, где они не заполнены
+async function autoFillUnitsAndPrices() {
+    console.log('Начинаем автозаполнение единиц и цен...');
+    console.log('Всего единиц измерения:', units.length);
+    console.log('Всего расходов:', expenses.length);
+    
+    // Находим единицу измерения "шт" - более гибкий поиск
+    let unitSh = units.find(u => 
+        u.short_name && u.short_name.toLowerCase().trim() === 'шт'
+    );
+    
+    if (!unitSh) {
+        unitSh = units.find(u => 
+            u.name && u.name.toLowerCase().trim() === 'штука'
+        );
+    }
+    
+    if (!unitSh) {
+        unitSh = units.find(u => 
+            (u.short_name && u.short_name.toLowerCase().includes('шт')) ||
+            (u.name && u.name.toLowerCase().includes('шт'))
+        );
+    }
+    
+    if (!unitSh) {
+        console.error('Единица измерения "шт" не найдена в справочнике. Доступные единицы:', units.map(u => ({ id: u.id, name: u.name, short: u.short_name })));
+        alert('Ошибка: единица измерения "шт" не найдена в справочнике. Проверьте консоль браузера.');
+        return false;
+    }
+    
+    console.log('Найдена единица измерения "шт":', unitSh);
+    
+    let hasChanges = false;
+    const expensesToUpdate = [];
+    
+    // Обрабатываем ВСЕ записи, где есть стоимость, но нет единицы/количества/цены
+    for (const expense of expenses) {
+        const hasAmount = expense.amount && parseFloat(expense.amount) > 0;
+        const hasNoUnit = !expense.unit_id;
+        const hasNoQuantity = !expense.quantity || parseFloat(expense.quantity) === 0;
+        const hasNoPrice = !expense.price || parseFloat(expense.price) === 0;
+        
+        // Если есть стоимость, но нет единицы, количества или цены - заполняем
+        if (hasAmount && (hasNoUnit || hasNoQuantity || hasNoPrice)) {
+            const amount = parseFloat(expense.amount);
+            const updateData = {};
+            
+            // Устанавливаем единицу измерения "шт"
+            if (hasNoUnit) {
+                updateData.unit_id = unitSh.id;
+                hasChanges = true;
+            }
+            
+            // Устанавливаем количество = 1
+            if (hasNoQuantity) {
+                updateData.quantity = 1;
+                hasChanges = true;
+            }
+            
+            // Устанавливаем цену = стоимости (так как количество = 1, стоимость останется неизменной)
+            if (hasNoPrice) {
+                updateData.price = amount;
+                hasChanges = true;
+            }
+            
+            // Пересчитываем стоимость: количество (1) * цена (стоимость) = стоимость (неизменна)
+            const quantity = updateData.quantity || expense.quantity || 1;
+            const price = updateData.price || expense.price || amount;
+            updateData.amount = quantity * price; // Это должно быть равно исходной стоимости
+            
+            if (Object.keys(updateData).length > 0 && expense.id) {
+                console.log(`Запись ${expense.id}: заполняем`, updateData);
+                expensesToUpdate.push({ id: expense.id, data: updateData });
+            }
+        }
+    }
+    
+    console.log(`Найдено записей для обновления: ${expensesToUpdate.length}`);
+    
+    // Сохраняем изменения, если они есть
+    if (hasChanges && expensesToUpdate.length > 0) {
+        try {
+            const updatePromises = expensesToUpdate.map(({ id, data }) => 
+                expensesAPI.update(id, data)
+            );
+            await Promise.all(updatePromises);
+            console.log('✅ Автоматически заполнены единицы измерения и цены для', updatePromises.length, 'записей');
+            alert(`✅ Автоматически заполнено ${updatePromises.length} записей!`);
+            return true;
+        } catch (error) {
+            console.error('Ошибка автоматического заполнения:', error);
+            alert('Ошибка при автоматическом заполнении. Проверьте консоль браузера.');
+            return false;
+        }
+    } else {
+        console.log('Нет записей для автозаполнения');
+    }
+    
+    return false;
+}
+
+// Глобальная функция для ручного запуска автозаполнения
+window.autoFillUnitsAndPrices = autoFillUnitsAndPrices;
+
+// Ручной запуск автозаполнения с перезагрузкой данных
+async function manualAutoFill() {
+    if (!confirm('Заполнить единицы измерения (шт), количество (1) и цены для всех записей с незаполненными полями?')) {
+        return;
+    }
+    
+    try {
+        // Перезагружаем данные перед автозаполнением
+        expenses = await expensesAPI.getAll();
+        const hasChanges = await autoFillUnitsAndPrices();
+        
+        if (hasChanges) {
+            // Перезагружаем данные после автозаполнения
+            await loadExpenses();
+        } else {
+            alert('Нет записей для автозаполнения или все поля уже заполнены.');
+        }
+    } catch (error) {
+        console.error('Ошибка ручного автозаполнения:', error);
+        alert('Ошибка при автозаполнении. Проверьте консоль браузера.');
+    }
+}
+
 // Отображение расходов
 function renderExpenses(filteredExpenses = null) {
     const tbody = document.getElementById('expenses-tbody');
-    const data = filteredExpenses || expenses;
+    let data = filteredExpenses || expenses;
     
     if (data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><p>Нет расходов</p><p>Добавьте первую строку</p></td></tr>';
         return;
     }
+    
+    // Сортируем данные: сначала по дате (новые сверху), затем по ID (новые сверху)
+    data = [...data].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        if (dateB.getTime() !== dateA.getTime()) {
+            return dateB.getTime() - dateA.getTime();
+        }
+        return (b.id || 0) - (a.id || 0);
+    });
     
     // Используем порядковый номер начиная с 1
     tbody.innerHTML = data.map((expense, index) => {
@@ -225,6 +401,9 @@ function renderExpenses(filteredExpenses = null) {
     
     // Добавляем обработчики событий для редактируемых ячеек
     setupEditableCells();
+    
+    // Проверяем и подсвечиваем строки с незаполненными полями
+    highlightIncompleteRows();
 }
 
 // Настройка редактируемых ячеек
@@ -258,8 +437,55 @@ function setupEditableCells() {
                 changedCells.set(expenseIdNum, {});
             }
             changedCells.get(expenseIdNum)[field] = value;
+            
+            // Если изменили цену или количество, пересчитываем стоимость
+            if (field === 'price' || field === 'quantity') {
+                calculateAmount(expenseId);
+            }
+            
+            // Проверяем строку на полноту заполнения
+            highlightIncompleteRow(expenseId);
         });
     });
+}
+
+// Подсветка строк с незаполненными обязательными полями
+function highlightIncompleteRows() {
+    const rows = document.querySelectorAll('#expenses-tbody tr[data-id]');
+    rows.forEach(row => {
+        const expenseId = row.dataset.id;
+        highlightIncompleteRow(expenseId);
+    });
+}
+
+// Подсветка одной строки
+function highlightIncompleteRow(expenseId) {
+    const row = document.querySelector(`tr[data-id="${expenseId}"]`);
+    if (!row) return;
+    
+    // Проверяем обязательные поля
+    const categorySelect = row.querySelector('[data-field="category_id"]');
+    const subcategoryTextarea = row.querySelector('[data-field="subcategory"]');
+    const unitSelect = row.querySelector('[data-field="unit_id"]');
+    const quantityInput = row.querySelector('[data-field="quantity"]');
+    const priceInput = row.querySelector('[data-field="price"]');
+    const amountCell = row.querySelector('.amount-cell');
+    
+    const category = categorySelect ? categorySelect.value : '';
+    const subcategory = subcategoryTextarea ? subcategoryTextarea.value.trim() : '';
+    const unit = unitSelect ? unitSelect.value : '';
+    const quantity = quantityInput ? (parseFloat(quantityInput.value) || 0) : 0;
+    const price = priceInput ? (parsePriceInput(priceInput.value) || 0) : 0;
+    const amount = amountCell ? (parseFloat(amountCell.textContent.replace(/\s/g, '').replace(',', '.')) || 0) : 0;
+    
+    // Проверяем, все ли поля заполнены
+    const isIncomplete = !category || !subcategory || !unit || quantity === 0 || price === 0 || amount === 0;
+    
+    if (isIncomplete) {
+        row.classList.add('incomplete-row');
+    } else {
+        row.classList.remove('incomplete-row');
+    }
 }
 
 // Расчёт стоимости (количество * цена)
@@ -293,7 +519,7 @@ function calculateAmount(expenseId) {
 // Заполнение фильтров
 function populateProjectFilter() {
     const select = document.getElementById('filter-project');
-    select.innerHTML = '<option value="">Все объекты</option>' +
+    select.innerHTML = '<option value="">Объекты</option>' +
         projects.map(project => {
             const client = clients.find(c => c.id === project.client_id);
             const clientName = client ? client.name : 'Неизвестно';
@@ -303,8 +529,54 @@ function populateProjectFilter() {
 
 function populateCategoryFilter() {
     const select = document.getElementById('filter-category');
-    select.innerHTML = '<option value="">Все категории</option>' +
+    select.innerHTML = '<option value="">Категории</option>' +
         categories.map(cat => `<option value="${cat.id}">${cat.name}</option>`).join('');
+}
+
+function populateClientFilter() {
+    const select = document.getElementById('filter-client');
+    // Получаем уникальных клиентов из проектов
+    const uniqueClients = [];
+    const clientIds = new Set();
+    
+    projects.forEach(project => {
+        if (project.client_id && !clientIds.has(project.client_id)) {
+            const client = clients.find(c => c.id === project.client_id);
+            if (client) {
+                uniqueClients.push(client);
+                clientIds.add(project.client_id);
+            }
+        }
+    });
+    
+    select.innerHTML = '<option value="">Клиенты</option>' +
+        uniqueClients.map(client => `<option value="${client.id}">${client.name}</option>`).join('');
+}
+
+function populateShopFilter() {
+    const select = document.getElementById('filter-shop');
+    select.innerHTML = '<option value="">Магазины</option>' +
+        shops.map(shop => `<option value="${shop.id}">${shop.name}</option>`).join('');
+}
+
+function populateSubcategoryFilter() {
+    const select = document.getElementById('filter-subcategory');
+    // Получаем уникальные подкатегории из всех расходов
+    const uniqueSubcategories = [];
+    const subcategorySet = new Set();
+    
+    expenses.forEach(expense => {
+        if (expense.subcategory && expense.subcategory.trim() && !subcategorySet.has(expense.subcategory.trim())) {
+            uniqueSubcategories.push(expense.subcategory.trim());
+            subcategorySet.add(expense.subcategory.trim());
+        }
+    });
+    
+    // Сортируем по алфавиту
+    uniqueSubcategories.sort();
+    
+    select.innerHTML = '<option value="">Подкатегория</option>' +
+        uniqueSubcategories.map(sub => `<option value="${sub}">${sub}</option>`).join('');
 }
 
 // Обновление итогов
@@ -316,20 +588,65 @@ function updateSummary(filteredExpenses = null) {
 
 // Фильтрация расходов
 function filterExpenses() {
-    const projectId = document.getElementById('filter-project').value;
     const categoryId = document.getElementById('filter-category').value;
+    const subcategory = document.getElementById('filter-subcategory').value.trim();
+    const priceMin = parseFloat(document.getElementById('filter-price-min').value) || null;
+    const priceMax = parseFloat(document.getElementById('filter-price-max').value) || null;
+    const amountMin = parseFloat(document.getElementById('filter-amount-min').value) || null;
+    const amountMax = parseFloat(document.getElementById('filter-amount-max').value) || null;
+    const clientId = document.getElementById('filter-client').value;
+    const projectId = document.getElementById('filter-project').value;
+    const shopId = document.getElementById('filter-shop').value;
     const month = document.getElementById('filter-month').value;
     
     let filtered = expenses;
     
-    if (projectId) {
-        filtered = filtered.filter(item => item.project_id === parseInt(projectId));
-    }
-    
+    // Фильтр по категории
     if (categoryId) {
         filtered = filtered.filter(item => item.category_id === parseInt(categoryId));
     }
     
+    // Фильтр по подкатегории (точное совпадение)
+    if (subcategory) {
+        filtered = filtered.filter(item => {
+            const itemSubcategory = (item.subcategory || '').trim();
+            return itemSubcategory === subcategory;
+        });
+    }
+    
+    // Фильтр по цене
+    if (priceMin !== null) {
+        filtered = filtered.filter(item => (parseFloat(item.price) || 0) >= priceMin);
+    }
+    if (priceMax !== null) {
+        filtered = filtered.filter(item => (parseFloat(item.price) || 0) <= priceMax);
+    }
+    
+    // Фильтр по стоимости
+    if (amountMin !== null) {
+        filtered = filtered.filter(item => (parseFloat(item.amount) || 0) >= amountMin);
+    }
+    if (amountMax !== null) {
+        filtered = filtered.filter(item => (parseFloat(item.amount) || 0) <= amountMax);
+    }
+    
+    // Фильтр по клиенту (через проект)
+    if (clientId) {
+        const clientProjects = projects.filter(p => p.client_id === parseInt(clientId)).map(p => p.id);
+        filtered = filtered.filter(item => clientProjects.includes(item.project_id));
+    }
+    
+    // Фильтр по объекту
+    if (projectId) {
+        filtered = filtered.filter(item => item.project_id === parseInt(projectId));
+    }
+    
+    // Фильтр по магазину
+    if (shopId) {
+        filtered = filtered.filter(item => item.shop_id === parseInt(shopId));
+    }
+    
+    // Фильтр по месяцу
     if (month) {
         const [year, monthNum] = month.split('-');
         filtered = filtered.filter(item => {
@@ -342,6 +659,21 @@ function filterExpenses() {
     renderExpenses(filtered);
     updateSummary(filtered);
 }
+
+// Очистка всех фильтров (глобальная функция)
+window.clearFilters = function() {
+    document.getElementById('filter-category').value = '';
+    document.getElementById('filter-subcategory').value = '';
+    document.getElementById('filter-price-min').value = '';
+    document.getElementById('filter-price-max').value = '';
+    document.getElementById('filter-amount-min').value = '';
+    document.getElementById('filter-amount-max').value = '';
+    document.getElementById('filter-client').value = '';
+    document.getElementById('filter-project').value = '';
+    document.getElementById('filter-shop').value = '';
+    document.getElementById('filter-month').value = '';
+    filterExpenses();
+};
 
 // Добавление новой строки
 function addNewRow() {
@@ -431,6 +763,17 @@ async function saveAllChanges() {
             savePromises.push(expensesAPI.create(data));
         } else {
             // Обновление существующего расхода
+            // Если изменились цена или количество, пересчитываем стоимость
+            const row = document.querySelector(`tr[data-id="${expenseId}"]`);
+            if (row && (changes.price !== undefined || changes.quantity !== undefined)) {
+                const quantityInput = row.querySelector('[data-field="quantity"]');
+                const priceInput = row.querySelector('[data-field="price"]');
+                
+                const quantity = changes.quantity !== undefined ? changes.quantity : (parseFloat(quantityInput.value) || 0);
+                const price = changes.price !== undefined ? changes.price : (parsePriceInput(priceInput.value) || 0);
+                
+                changes.amount = quantity * price;
+            }
             savePromises.push(expensesAPI.update(expenseId, changes));
         }
     }
@@ -439,6 +782,12 @@ async function saveAllChanges() {
         await Promise.all(savePromises);
         changedCells.clear();
         showSaveIndicator();
+        if (typeof updateCashInNavigation === 'function') {
+            updateCashInNavigation();
+        }
+        if (typeof updateTodayCash === 'function') {
+            await updateTodayCash();
+        }
         await loadExpenses();
     } catch (error) {
         console.error('Ошибка сохранения:', error);
@@ -487,6 +836,12 @@ async function deleteExpense(id) {
     try {
         await expensesAPI.delete(id);
         await loadExpenses();
+        if (typeof updateCashInNavigation === 'function') {
+            updateCashInNavigation();
+        }
+        if (typeof updateTodayCash === 'function') {
+            await updateTodayCash();
+        }
         alert('Расход успешно удалён!');
     } catch (error) {
         console.error('Ошибка удаления расхода:', error);

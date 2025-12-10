@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taiga - Касса</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -15,46 +16,12 @@
                 <a href="taiga.html" class="nav-link">Объекты</a>
                 <a href="income.html" class="nav-link">Доходы</a>
                 <a href="expenses.html" class="nav-link">Расходы</a>
-                <a href="cash.html" class="nav-link active">Касса</a>
+                <a href="cash.html" class="nav-link active" id="cash-nav-link">Касса</a>
             </nav>
         </header>
 
         <!-- Main Content -->
         <main class="main">
-            <!-- Today's Cash -->
-            <div class="cash-card">
-                <h2>Сегодня</h2>
-                <div class="cash-form">
-                    <div class="form-group">
-                        <label for="today-date">Дата</label>
-                        <input type="date" id="today-date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="today-actual">Фактический остаток *</label>
-                        <input type="number" id="today-actual" step="0.01" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="today-initial">Начальный остаток</label>
-                        <input type="number" id="today-initial" step="0.01" value="0">
-                    </div>
-                    <button class="btn btn-primary" onclick="saveTodayCash()">Сохранить</button>
-                </div>
-                <div class="cash-summary">
-                    <div class="summary-item">
-                        <span class="summary-label">Расчётная сумма:</span>
-                        <span class="summary-value" id="calculated-amount">0.00 ₽</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">Фактический остаток:</span>
-                        <span class="summary-value" id="actual-amount">0.00 ₽</span>
-                    </div>
-                    <div class="summary-item">
-                        <span class="summary-label">Разница:</span>
-                        <span class="summary-value" id="difference">0.00 ₽</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Cash History -->
             <div class="table-container">
                 <h2>История кассы</h2>
@@ -62,10 +29,9 @@
                     <thead>
                         <tr>
                             <th>Дата</th>
-                            <th>Расчётная сумма</th>
-                            <th>Фактический остаток</th>
+                            <th>Касса</th>
+                            <th>Факт</th>
                             <th>Разница</th>
-                            <th>Начальный остаток</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -78,8 +44,10 @@
     </div>
 
     <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
     <script src="assets/js/cash.js"></script>
 </body>
 </html>
+
 
 

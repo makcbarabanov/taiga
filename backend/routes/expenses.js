@@ -26,9 +26,24 @@ router.get('/', async (req, res) => {
             paramCount++;
         }
         
-        query += ' ORDER BY date DESC';
+        query += ' ORDER BY date DESC, id DESC';
         const result = await pool.query(query, params);
-        res.json(result.rows);
+        
+        // Форматируем даты в формат YYYY-MM-DD без временной зоны
+        const formattedRows = result.rows.map(row => {
+            if (row.date) {
+                // Если дата приходит как строка или Date объект, форматируем её
+                const date = row.date instanceof Date ? row.date : new Date(row.date);
+                // Используем локальную дату без времени
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                row.date = `${year}-${month}-${day}`;
+            }
+            return row;
+        });
+        
+        res.json(formattedRows);
     } catch (error) {
         console.error('Error fetching expenses:', error);
         res.status(500).json({ error: error.message });
@@ -45,7 +60,17 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Expense not found' });
         }
         
-        res.json(result.rows[0]);
+        // Форматируем дату
+        const row = result.rows[0];
+        if (row.date) {
+            const date = row.date instanceof Date ? row.date : new Date(row.date);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            row.date = `${year}-${month}-${day}`;
+        }
+        
+        res.json(row);
     } catch (error) {
         console.error('Error fetching expense:', error);
         res.status(500).json({ error: error.message });
@@ -132,5 +157,6 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
 
 

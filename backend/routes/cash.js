@@ -6,6 +6,23 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+// GET /api/cash/current - получить текущую кассу (сумма доходов - сумма расходов)
+router.get('/current', async (req, res) => {
+    try {
+        // Сначала обновляем запись на сегодня
+        await pool.query('SELECT taiga.update_today_cash_record()');
+        
+        // Рассчитываем текущую кассу
+        const result = await pool.query('SELECT taiga.calculate_current_cash() as cash');
+        const cashAmount = result.rows[0].cash || 0;
+        
+        res.json({ cash: cashAmount });
+    } catch (error) {
+        console.error('Error fetching current cash:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // GET /api/cash - получить все записи кассы
 router.get('/', async (req, res) => {
     try {
@@ -49,6 +66,24 @@ router.post('/', async (req, res) => {
     try {
         const { date, calculated_amount, actual_amount, difference, initial_balance, notes } = req.body;
         
+        // Проверяем, не существует ли уже запись с такой датой
+        const existing = await pool.query('SELECT id FROM taiga.cash WHERE date = $1', [date]);
+        if (existing.rows.length > 0) {
+            // Если запись существует, обновляем её вместо создания новой
+            const result = await pool.query(
+                `UPDATE taiga.cash
+                 SET calculated_amount = $1, actual_amount = $2, 
+                     difference = $3, initial_balance = $4, notes = $5
+                 WHERE date = $6
+                 RETURNING *`,
+                [
+                    calculated_amount || null, actual_amount || null,
+                    difference || null, initial_balance || 0, notes || null, date
+                ]
+            );
+            return res.json(result.rows[0]);
+        }
+        
         const result = await pool.query(
             `INSERT INTO taiga.cash (date, calculated_amount, actual_amount, difference, initial_balance, notes)
              VALUES ($1, $2, $3, $4, $5, $6)
@@ -62,6 +97,27 @@ router.post('/', async (req, res) => {
         res.status(201).json(result.rows[0]);
     } catch (error) {
         console.error('Error creating cash record:', error);
+        // Если ошибка из-за дубликата, пытаемся обновить существующую запись
+        if (error.code === '23505') { // PostgreSQL unique violation
+            try {
+                const { date, calculated_amount, actual_amount, difference, initial_balance, notes } = req.body;
+                const result = await pool.query(
+                    `UPDATE taiga.cash
+                     SET calculated_amount = $1, actual_amount = $2, 
+                         difference = $3, initial_balance = $4, notes = $5
+                     WHERE date = $6
+                     RETURNING *`,
+                    [
+                        calculated_amount || null, actual_amount || null,
+                        difference || null, initial_balance || 0, notes || null, date
+                    ]
+                );
+                return res.json(result.rows[0]);
+            } catch (updateError) {
+                console.error('Error updating cash record:', updateError);
+                return res.status(500).json({ error: updateError.message });
+            }
+        }
         res.status(500).json({ error: error.message });
     }
 });
@@ -113,5 +169,6 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
 
 
