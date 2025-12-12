@@ -271,7 +271,8 @@ async function autoFillUnitsAndPrices() {
             );
             await Promise.all(updatePromises);
             console.log('✅ Автоматически заполнены единицы измерения и цены для', updatePromises.length, 'записей');
-            alert(`✅ Автоматически заполнено ${updatePromises.length} записей!`);
+            // Обновляем данные на странице без показа модального окна
+            await loadExpenses();
             return true;
         } catch (error) {
             console.error('Ошибка автоматического заполнения:', error);
@@ -363,21 +364,12 @@ function renderExpenses(filteredExpenses = null) {
             <tr data-id="${expense.id}">
                 <td class="col-id">${index + 1}</td>
                 <td><input type="date" class="editable-cell" data-field="date" data-id="${expense.id}" value="${dateValue}"></td>
-                <td>
-                    <select class="editable-cell" data-field="category_id" data-id="${expense.id}">
-                        ${categories.map(c => `<option value="${c.id}" ${c.id === expense.category_id ? 'selected' : ''}>${c.name}</option>`).join('')}
-                    </select>
-                </td>
+                <td class="col-category">${categoryName}</td>
                 <td class="col-subcategory"><textarea class="editable-cell" data-field="subcategory" data-id="${expense.id}" rows="2">${expense.subcategory || ''}</textarea></td>
-                <td class="col-unit">
-                    <select class="editable-cell" data-field="unit_id" data-id="${expense.id}">
-                        <option value="">-</option>
-                        ${units.map(u => `<option value="${u.id}" ${u.id === expense.unit_id ? 'selected' : ''}>${u.short_name || u.name}</option>`).join('')}
-                    </select>
-                </td>
+                <td class="col-unit">${unitName || '-'}</td>
                 <td class="col-quantity"><input type="number" class="editable-cell" data-field="quantity" data-id="${expense.id}" step="0.01" value="${formatNumberInput(expense.quantity)}" onchange="calculateAmount(${expense.id})"></td>
                 <td class="col-price"><input type="text" class="editable-cell" data-field="price" data-id="${expense.id}" value="${formatPriceInput(expense.price)}" onchange="calculateAmount(${expense.id})" onblur="formatPriceOnBlur(this)"></td>
-                <td class="col-amount"><span class="amount-cell" data-id="${expense.id}">${formatPrice(expense.amount)}</span> ₽</td>
+                <td class="col-amount"><span class="amount-cell" data-id="${expense.id}">${formatPrice(expense.amount)}</span></td>
                 <td class="col-client" data-client-name="${clientName}">${clientName}</td>
                 <td class="col-project">
                     <select class="editable-cell" data-field="project_id" data-id="${expense.id}" onchange="updateClientNameInRow(this)">
@@ -427,6 +419,9 @@ function setupEditableCells() {
                 value = parsePriceInput(value);
             } else if (field === 'quantity') {
                 value = parseFloat(value) || null;
+            } else if (field === 'shop_id' || field === 'unit_id' || field === 'category_id' || field === 'project_id') {
+                // Для ID полей преобразуем в число или null
+                value = value ? parseInt(value) : null;
             }
             
             // Помечаем ячейку как изменённую
@@ -465,21 +460,24 @@ function highlightIncompleteRow(expenseId) {
     
     // Проверяем обязательные поля
     const categorySelect = row.querySelector('[data-field="category_id"]');
+    const categoryCell = row.querySelector('.col-category');
     const subcategoryTextarea = row.querySelector('[data-field="subcategory"]');
     const unitSelect = row.querySelector('[data-field="unit_id"]');
+    const unitCell = row.querySelector('.col-unit');
     const quantityInput = row.querySelector('[data-field="quantity"]');
     const priceInput = row.querySelector('[data-field="price"]');
     const amountCell = row.querySelector('.amount-cell');
     
-    const category = categorySelect ? categorySelect.value : '';
+    // Для существующих записей категория и единица - текст, для новых - select
+    const category = categorySelect ? categorySelect.value : (categoryCell ? categoryCell.textContent.trim() : '');
     const subcategory = subcategoryTextarea ? subcategoryTextarea.value.trim() : '';
-    const unit = unitSelect ? unitSelect.value : '';
+    const unit = unitSelect ? unitSelect.value : (unitCell ? unitCell.textContent.trim() : '');
     const quantity = quantityInput ? (parseFloat(quantityInput.value) || 0) : 0;
     const price = priceInput ? (parsePriceInput(priceInput.value) || 0) : 0;
     const amount = amountCell ? (parseFloat(amountCell.textContent.replace(/\s/g, '').replace(',', '.')) || 0) : 0;
     
     // Проверяем, все ли поля заполнены
-    const isIncomplete = !category || !subcategory || !unit || quantity === 0 || price === 0 || amount === 0;
+    const isIncomplete = !category || !subcategory || !unit || unit === '-' || quantity === 0 || price === 0 || amount === 0;
     
     if (isIncomplete) {
         row.classList.add('incomplete-row');
@@ -556,6 +554,7 @@ function populateClientFilter() {
 function populateShopFilter() {
     const select = document.getElementById('filter-shop');
     select.innerHTML = '<option value="">Магазины</option>' +
+        '<option value="empty">[пустое]</option>' +
         shops.map(shop => `<option value="${shop.id}">${shop.name}</option>`).join('');
 }
 
@@ -643,7 +642,12 @@ function filterExpenses() {
     
     // Фильтр по магазину
     if (shopId) {
-        filtered = filtered.filter(item => item.shop_id === parseInt(shopId));
+        if (shopId === 'empty') {
+            // Фильтр для записей без магазина
+            filtered = filtered.filter(item => !item.shop_id || item.shop_id === null);
+        } else {
+            filtered = filtered.filter(item => item.shop_id === parseInt(shopId));
+        }
     }
     
     // Фильтр по месяцу
@@ -699,7 +703,7 @@ function addNewRow() {
             </td>
             <td class="col-quantity"><input type="number" class="editable-cell" data-field="quantity" data-id="${newId}" step="0.01"></td>
             <td class="col-price"><input type="text" class="editable-cell" data-field="price" data-id="${newId}" onchange="calculateAmount('${newId}')" onblur="formatPriceOnBlur(this)"></td>
-            <td class="col-amount"><span class="amount-cell" data-id="${newId}">0</span> ₽</td>
+            <td class="col-amount"><span class="amount-cell" data-id="${newId}">0</span></td>
             <td class="col-client">-</td>
             <td class="col-project">
                 <select class="editable-cell" data-field="project_id" data-id="${newId}" onchange="updateClientName(this)">
@@ -725,8 +729,8 @@ function addNewRow() {
     setupEditableCells();
 }
 
-// Сохранение всех изменений
-async function saveAllChanges() {
+// Сохранение всех изменений (глобальная функция)
+window.saveAllChanges = async function saveAllChanges() {
     if (changedCells.size === 0) {
         alert('Нет изменений для сохранения');
         return;
@@ -774,6 +778,12 @@ async function saveAllChanges() {
                 
                 changes.amount = quantity * price;
             }
+            
+            // Убеждаемся, что shop_id правильно преобразован
+            if (changes.shop_id !== undefined) {
+                changes.shop_id = changes.shop_id ? parseInt(changes.shop_id) : null;
+            }
+            
             savePromises.push(expensesAPI.update(expenseId, changes));
         }
     }

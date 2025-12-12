@@ -12,12 +12,24 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    📚
+                </a>
+            </h1>
             <nav class="nav">
-                <a href="taiga.html" class="nav-link">Объекты</a>
-                <a href="income.html" class="nav-link">Доходы</a>
-                <a href="expenses.html" class="nav-link active">Расходы</a>
-                <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link active" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
             </nav>
         </header>
 
@@ -26,6 +38,7 @@
             <!-- Actions -->
             <div class="actions">
                 <button class="btn btn-primary" onclick="addNewRow()">+ Добавить строку</button>
+                <button class="btn btn-success" onclick="saveAllChanges()">💾 Сохранить изменения</button>
                 <button class="btn btn-secondary" onclick="clearFilters()">Очистить фильтры</button>
             </div>
 
@@ -35,7 +48,7 @@
                     <option value="">Категории</option>
                 </select>
                 <select id="filter-subcategory" onchange="filterExpenses()">
-                    <option value="">Подкатегория</option>
+                    <option value="">Наименование</option>
                 </select>
                 <input type="number" id="filter-price-min" placeholder="Цена от" step="0.01" oninput="filterExpenses()" class="filter-price">
                 <input type="number" id="filter-price-max" placeholder="Цена до" step="0.01" oninput="filterExpenses()" class="filter-price">
@@ -61,7 +74,7 @@
                             <th class="col-id">N</th>
                             <th class="col-date">Дата</th>
                             <th class="col-category">Категория</th>
-                            <th class="col-subcategory">Подкатегория</th>
+                            <th class="col-subcategory">Наименование</th>
                             <th class="col-unit">Ед. изм.</th>
                             <th class="col-quantity">Кол-во</th>
                             <th class="col-price">Цена</th>

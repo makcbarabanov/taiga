@@ -4,11 +4,15 @@
 
 .editable-table-container {
     position: relative;
+    max-height: calc(100vh - 300px); /* Ограничиваем высоту для скроллинга */
+    overflow-y: auto;
+    overflow-x: hidden; /* Убираем горизонтальную полосу прокрутки */
 }
 
 .editable-table {
-    table-layout: auto;
+    table-layout: fixed; /* Фиксированная ширина колонок для контроля */
     width: 100%;
+    font-size: 12px; /* Уменьшен на 2 пункта (было 14px) */
 }
 
 /* Ширина колонок */
@@ -21,13 +25,16 @@
 }
 
 .editable-table .col-date {
-    width: 100px;
-    min-width: 100px;
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
 }
 
 /* Убираем календарный виджет у input[type="date"] */
 .editable-table .col-date input[type="date"] {
     position: relative;
+    padding: 0; /* Убираем padding, он уже есть в td */
+    line-height: 1.2; /* Компактная высота строки */
 }
 
 .editable-table .col-date input[type="date"]::-webkit-calendar-picker-indicator {
@@ -44,16 +51,21 @@
 }
 
 .editable-table .col-category {
-    width: 120px;
-    min-width: 120px;
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-table .col-subcategory {
-    width: 250px;
+    width: 250px; /* Уменьшена для размещения на экране */
     min-width: 200px;
     max-width: 300px;
     white-space: normal;
     word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .editable-table .col-subcategory .editable-cell {
@@ -65,83 +77,129 @@
 
 .editable-table .col-subcategory textarea.editable-cell {
     width: 100%;
-    min-height: 40px;
-    max-height: 100px;
-    padding: 6px;
+    min-height: auto; /* Убираем фиксированную минимальную высоту */
+    max-height: none; /* Убираем ограничение высоты */
+    padding: 0; /* Убираем padding, он уже есть в td */
     border: 1px solid transparent;
     background: transparent;
-    font-size: 14px;
+    font-size: 12px; /* Уменьшен на 2 пункта (было 14px) */
     font-family: inherit;
     resize: vertical;
-    overflow-y: auto;
+    overflow-y: visible; /* Убираем скролл, текст расширяет ячейку */
+    box-sizing: border-box;
+    line-height: 1.2; /* Компактная высота строки */
 }
 
 .editable-table .col-unit {
-    width: auto;
+    width: 50px;
     min-width: 50px;
-    max-width: 70px;
+    max-width: 50px;
     text-align: center;
     white-space: nowrap;
 }
 
 .editable-table .col-quantity {
-    width: auto;
+    width: 60px;
     min-width: 60px;
-    max-width: 80px;
+    max-width: 60px;
     text-align: right;
-    white-space: nowrap;
+    white-space: normal; /* Разрешаем перенос, если нужно */
+    word-wrap: break-word;
+    overflow: visible; /* Убираем обрезку */
 }
 
 .editable-table .col-price {
-    width: auto;
-    min-width: 80px;
-    max-width: 120px;
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
     text-align: right;
     white-space: nowrap;
 }
 
 .editable-table .col-amount {
-    width: 120px;
-    min-width: 120px;
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
     text-align: right;
     white-space: nowrap;
 }
 
 .editable-table .col-client {
-    width: 120px;
-    min-width: 120px;
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-table .col-project {
-    width: 150px;
-    min-width: 150px;
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-table .col-shop {
-    width: 150px;
-    min-width: 150px;
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-table .col-comment {
-    width: 200px;
-    min-width: 200px;
+    width: 120px;
+    min-width: 120px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .editable-table td {
     position: relative;
-    padding: 8px;
+    padding: 3px 8px; /* Минимальный вертикальный padding 3px */
+    border-right: 1px solid #e0e0e0;
+    height: auto; /* Автоматическая высота */
+    vertical-align: top; /* Выравнивание по верху */
+    overflow: visible; /* Убираем обрезку */
+    line-height: 1.2; /* Компактная высота строки */
+}
+
+.editable-table th {
+    border-right: 1px solid #e0e0e0;
+    position: sticky;
+    top: 0;
+    background-color: var(--primary-color); /* Тёмный фон как в основной таблице */
+    color: white; /* Белый текст */
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    padding: 3px 8px; /* Минимальный вертикальный padding 3px */
+    height: auto; /* Автоматическая высота */
+    line-height: 1.2; /* Компактная высота строки */
+}
+
+.editable-table td:last-child,
+.editable-table th:last-child {
+    border-right: none;
 }
 
 .editable-cell {
     width: 100%;
-    min-height: 30px;
-    padding: 6px;
+    min-height: auto; /* Убираем фиксированную минимальную высоту */
+    padding: 0; /* Убираем padding, он уже есть в td */
     border: 1px solid transparent;
     background: transparent;
-    font-size: 14px;
+    font-size: 12px; /* Уменьшен на 2 пункта (было 14px) */
     font-family: inherit;
     cursor: text;
     transition: all 0.2s;
+    box-sizing: border-box; /* Учитываем padding в ширине */
+    line-height: 1.2; /* Компактная высота строки */
 }
 
 .editable-cell:hover {
@@ -170,14 +228,41 @@
     border-color: var(--danger-color);
 }
 
+/* Все input элементы внутри editable-cell */
+.editable-cell input[type="text"],
+.editable-cell input[type="number"],
+.editable-cell input[type="date"] {
+    padding: 0; /* Убираем padding, он уже есть в td */
+    line-height: 1.2; /* Компактная высота строки */
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 /* Select в ячейке */
 .editable-cell select {
     width: 100%;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 12px; /* Уменьшен на 2 пункта (было 14px) */
     font-family: inherit;
     cursor: pointer;
+    padding: 0; /* Убираем padding, он уже есть в td */
+    box-sizing: border-box;
+    line-height: 1.2; /* Компактная высота строки */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Input number в ячейке количества */
+.editable-table .col-quantity input[type="number"] {
+    width: 100%;
+    text-align: right;
+    padding: 0; /* Убираем padding, он уже есть в td */
+    box-sizing: border-box;
+    overflow: visible; /* Убираем обрезку */
+    white-space: normal; /* Разрешаем перенос, если нужно */
+    line-height: 1.2; /* Компактная высота строки */
 }
 
 .editable-cell select:focus {
@@ -228,5 +313,77 @@
         transform: translateX(0);
         opacity: 1;
     }
+}
+
+/* Подсветка строк с незаполненными обязательными полями */
+.incomplete-row {
+    background-color: #ffe6e6 !important;
+}
+
+.incomplete-row:hover {
+    background-color: #ffcccc !important;
+}
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
 }
 

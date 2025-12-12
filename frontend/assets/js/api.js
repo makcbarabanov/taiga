@@ -9,7 +9,17 @@ const api = {
     // GET запрос
     async get(endpoint) {
         try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`);
+            // Добавляем параметр для обхода кэша браузера
+            const cacheBuster = `?_t=${Date.now()}`;
+            const url = endpoint.includes('?') 
+                ? `${API_BASE_URL}${endpoint}&_t=${Date.now()}`
+                : `${API_BASE_URL}${endpoint}${cacheBuster}`;
+            const response = await fetch(url, {
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return await response.json();
         } catch (error) {
@@ -108,9 +118,12 @@ const expensesAPI = {
 // API методы для кассы
 const cashAPI = {
     getAll: () => api.get('/cash'),
+    getCurrent: () => api.get('/cash/current'),
+    getById: (id) => api.get(`/cash/${id}`),
     getByDate: (date) => api.get(`/cash?date=${date}`),
     create: (data) => api.post('/cash', data),
-    update: (id, data) => api.put(`/cash/${id}`, data)
+    update: (id, data) => api.put(`/cash/${id}`, data),
+    delete: (id) => api.delete(`/cash/${id}`)
 };
 
 // Форматирование чисел
@@ -153,6 +166,7 @@ const projectMaterialsAPI = {
 
 const projectJournalAPI = {
     getByProject: (projectId) => api.get(`/project-journal?project_id=${projectId}`),
+    getById: (id) => api.get(`/project-journal/${id}`),
     create: (data) => api.post('/project-journal', data),
     update: (id, data) => api.put(`/project-journal/${id}`, data),
     delete: (id) => api.delete(`/project-journal/${id}`)
@@ -160,5 +174,25 @@ const projectJournalAPI = {
 
 const projectTimesheetAPI = {
     getByProject: (projectId) => api.get(`/project-timesheet?project_id=${projectId}`)
+};
+
+// API методы для магазинов
+const shopsAPI = {
+    getAll: () => api.get('/shops'),
+    getById: (id) => api.get(`/shops/${id}`),
+    create: (data) => api.post('/shops', data),
+    update: (id, data) => api.put(`/shops/${id}`, data),
+    delete: (id) => api.delete(`/shops/${id}`)
+};
+
+const employeesAPI = {
+    getAll: (params) => {
+        const query = params ? '?' + new URLSearchParams(params).toString() : '';
+        return api.get(`/employees${query}`);
+    },
+    getById: (id) => api.get(`/employees/${id}`),
+    create: (data) => api.post('/employees', data),
+    update: (id, data) => api.put(`/employees/${id}`, data),
+    delete: (id) => api.delete(`/employees/${id}`)
 };
 

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Структура БД</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+        
+        /* Левая колонка: Список таблиц */
+        .left-column {
+            width: 300px;
+            border-right: 2px solid #00B0F0;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .tables-header {
+            padding: 15px;
+            background: #00B0F0;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .tables-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .table-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-item:hover {
+            background: #e3f2fd;
+        }
+        
+        .table-item.active {
+            background: #00B0F0;
+            color: white;
+        }
+        
+        .table-count {
+            font-size: 12px;
+            color: #666;
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .table-item.active .table-count {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        /* Правая колонка: Детали таблицы */
+        .right-column {
+            flex: 1;
+            overflow-y: auto;
+            background: white;
+            padding: 20px;
+        }
+        
+        .table-info {
+            max-width: 1200px;
+        }
+        
+        .table-title {
+            font-size: 24px;
+            color: #00B0F0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00B0F0;
+        }
+        
+        .badge-pk {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .badge-fk {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .badge-nullable {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .badge-not-null {
+            background: #f44336;
+            color: white;
+        }
+        
+        .foreign-key-link {
+            color: #00B0F0;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .foreign-key-link:hover {
+            text-decoration: underline;
+        }
+        
+        .table-description {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .fields-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .fields-table thead {
+            background: #00B0F0;
+            color: white;
+        }
+        
+        .fields-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #00B0F0;
+        }
+        
+        .fields-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+        
+        .fields-table tbody tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .fields-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .badge-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .badge-small {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        .example-cell {
+            font-family: monospace;
+            font-size: 11px;
+            color: #666;
+            max-width: 300px;
+            word-break: break-all;
+        }
+        
+        .link-cell {
+            color: #00B0F0;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .link-cell:hover {
+            color: #0088cc;
+        }
+        
+        .examples, .indexes {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .indexes {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .examples h3, .indexes h3 {
+            margin-bottom: 10px;
+            color: #2e7d32;
+        }
+        
+        .indexes h3 {
+            color: #1976d2;
+        }
+        
+        .example-row {
+            margin: 5px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .loading, .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 20px;
+            color: #f44336;
+            background: #ffebee;
+            border-radius: 4px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Левая колонка: Список таблиц -->
+    <div class="left-column">
+        <div class="tables-header">
+            📊 Таблицы в схеме taiga
+        </div>
+        <div class="tables-list" id="tables-list">
+            <div class="loading">Загрузка...</div>
+        </div>
+    </div>
+    
+    <!-- Правая колонка: Детали таблицы -->
+    <div class="right-column">
+        <div id="table-details">
+            <div class="empty-state">
+                <p>Выберите таблицу слева для просмотра структуры</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Словарь описаний таблиц и их полей
+        const tableDescriptions = {
+            'cash': {
+                description: 'Ежедневный учёт финансов (сверка остатков). Используется для контроля фактических денежных средств в кассе и сравнения их с расчётными значениями на основе доходов и расходов.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи о сверке кассы',
+                    'date': 'Дата сверки кассы. Одна запись на дату. Используется для ежедневного контроля остатков.',
+                    'calculated_amount': 'Расчётная сумма денежных средств в кассе. Рассчитывается автоматически как: доходы минус расходы плюс начальный остаток на эту дату.',
+                    'actual_amount': 'Фактический остаток денежных средств в кассе на конец дня. Вводится вручную при физической сверке кассы.',
+                    'difference': 'Разница между фактическим и расчётным остатком (actual_amount - calculated_amount). Используется для выявления расхождений, ошибок в учёте или неучтённых операций.',
+                    'initial_balance': 'Начальный остаток средств в кассе на начало периода (по умолчанию 0). Используется для правильного расчёта остатков.',
+                    'notes': 'Примечания и комментарии к записи о сверке кассы. Можно указать причины расхождений или другие важные замечания.',
+                    'created_at': 'Дата и время автоматического создания записи в системе',
+                    'updated_at': 'Дата и время последнего обновления записи (обновляется автоматически при изменении)'
+                }
+            },
+            'clients': {
+                description: 'Справочник клиентов строительной компании. Хранит контактную информацию и данные о заказчиках.',
+                fields: {
+                    'id': 'Уникальный идентификатор клиента',
+                    'name': 'Полное наименование клиента (уникальное)',
+                    'phone': 'Контактный телефон клиента',
+                    'email': 'Электронная почта клиента',
+                    'address': 'Адрес клиента',
+                    'notes': 'Дополнительные заметки и комментарии о клиенте',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'projects': {
+                description: 'База всех объектов (проектов) с финансовой аналитикой. Каждый проект привязан к клиенту и содержит информацию о запланированных и фактических доходах, расходах и прибыли.',
+                fields: {
+                    'id': 'Уникальный идентификатор проекта',
+                    'client_id': 'Связь с клиентом (таблица clients). Один клиент может иметь несколько проектов.',
+                    'name': 'Название проекта/объекта',
+                    'status': 'Статус проекта (например: "В работе", "Завершён", "Приостановлен")',
+                    'start_date': 'Дата начала работ по проекту',
+                    'end_date': 'Планируемая или фактическая дата завершения проекта',
+                    'planned_profit': 'Запланированная прибыль по проекту',
+                    'actual_profit': 'Фактическая прибыль по проекту',
+                    'planned_income': 'Запланированный доход от проекта',
+                    'actual_income': 'Фактически полученный доход',
+                    'planned_expense': 'Запланированные расходы на проект',
+                    'actual_expense': 'Фактически понесённые расходы',
+                    'notes': 'Примечания и комментарии к проекту',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'income': {
+                description: 'Все доходы от клиентов. Фиксирует каждое поступление денежных средств по проектам с привязкой к дате и проекту.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи о доходе',
+                    'project_id': 'Связь с проектом (таблица projects). Доход всегда привязан к конкретному проекту.',
+                    'date': 'Дата поступления денежных средств',
+                    'month': 'Месяц поступления (для удобства группировки и отчётов)',
+                    'year': 'Год поступления (для удобства группировки и отчётов)',
+                    'amount': 'Сумма дохода',
+                    'wallet': 'Кошелёк или счёт, на который поступили средства',
+                    'comment': 'Комментарий к доходу (источник, назначение платежа и т.д.)',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'expenses': {
+                description: 'Все расходы со всех объектов по всем категориям. Учитывает материалы, зарплаты, транспорт, накладные расходы и другие затраты.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи о расходе',
+                    'project_id': 'Связь с проектом (таблица projects). Расход всегда привязан к конкретному проекту.',
+                    'date': 'Дата расхода',
+                    'month': 'Месяц расхода',
+                    'year': 'Год расхода',
+                    'category_id': 'Связь с категорией расхода (таблица expense_categories): Мат, ФОТ, ТЗР, Накладные и т.д.',
+                    'subcategory': 'Подкатегория или дополнительная классификация расхода',
+                    'unit_id': 'Связь с единицей измерения (таблица units): шт, м², кг и т.д.',
+                    'quantity': 'Количество (объём закупки)',
+                    'price': 'Цена за единицу',
+                    'amount': 'Общая сумма расхода',
+                    'section': 'Раздел работ или объекта, к которому относится расход',
+                    'wallet': 'Кошелёк или счёт, с которого списаны средства',
+                    'shop_id': 'Связь с магазином/поставщиком (таблица shops)',
+                    'comment': 'Комментарий к расходу',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'shops': {
+                description: 'Справочник магазинов и поставщиков. Хранит информацию о компаниях, у которых закупаются материалы и услуги.',
+                fields: {
+                    'id': 'Уникальный идентификатор магазина/поставщика',
+                    'name': 'Название магазина или поставщика (уникальное)',
+                    'phone': 'Контактный телефон',
+                    'address': 'Адрес магазина/поставщика',
+                    'working_hours': 'Часы работы',
+                    'contact_person': 'Контактное лицо',
+                    'website': 'Сайт или ссылка на поставщика',
+                    'notes': 'Дополнительные заметки',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'tools': {
+                description: 'Справочник инструментов на балансе. Учитывает инструменты и оборудование, используемые в работе.',
+                fields: {
+                    'id': 'Уникальный идентификатор инструмента',
+                    'name': 'Название инструмента (уникальное)',
+                    'price': 'Стоимость инструмента',
+                    'project_id': 'Связь с проектом (таблица projects), к которому относится инструмент',
+                    'notes': 'Примечания об инструменте',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'expense_categories': {
+                description: 'Справочник категорий расходов. Используется для классификации всех расходов по типам: материалы, зарплаты, транспорт и т.д.',
+                fields: {
+                    'id': 'Уникальный идентификатор категории',
+                    'name': 'Название категории (уникальное): Мат, ФОТ, ТЗР, Накладные, Инструм, Расход, Прибыль',
+                    'description': 'Описание категории расходов',
+                    'created_at': 'Дата и время создания записи'
+                }
+            },
+            'units': {
+                description: 'Справочник единиц измерения. Используется для указания единиц при учёте материалов, работ и расходов.',
+                fields: {
+                    'id': 'Уникальный идентификатор единицы измерения',
+                    'name': 'Полное название единицы измерения (уникальное): штука, метр, квадратный метр и т.д.',
+                    'short_name': 'Сокращённое название единицы: шт, м, м² и т.д.',
+                    'created_at': 'Дата и время создания записи'
+                }
+            },
+            'project_statistics': {
+                description: 'Статистика по дням (план/факт готовности). Отслеживает ежедневный прогресс выполнения проекта в процентах.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи статистики',
+                    'project_id': 'Связь с проектом (таблица projects)',
+                    'date': 'Дата статистики',
+                    'planned_percent': 'Запланированный процент готовности проекта на эту дату',
+                    'actual_percent': 'Фактический процент готовности проекта на эту дату',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'project_works': {
+                description: 'Опись работ по проекту с прогрессом выполнения. Хранит список всех работ, которые необходимо выполнить на объекте, с указанием объёмов, стоимости и текущего прогресса.',
+                fields: {
+                    'id': 'Уникальный идентификатор работы',
+                    'project_id': 'Связь с проектом (таблица projects). Работа всегда привязана к конкретному проекту.',
+                    'unit_id': 'Связь с единицей измерения (таблица units): шт, м², м и т.д.',
+                    'quantity': 'Запланированное количество/объём работы',
+                    'price_per_unit': 'Цена за единицу измерения',
+                    'total_cost': 'Общая стоимость работы (quantity × price_per_unit)',
+                    'progress_percent': 'Процент выполнения работы (0-100). Рассчитывается автоматически на основе данных из журнала работ.',
+                    'completed_quantity': 'Выполненное количество/объём работы. Обновляется автоматически из журнала работ.',
+                    'status': 'Статус работы: "В процессе", "Завершена", "Приостановлена" и т.д.',
+                    'sort_order': 'Порядок сортировки работ при отображении',
+                    'stage_id': 'Связь с этапом работы (таблица work_stages): Тёплый контур, Отделка',
+                    'section_id': 'Связь с разделом работы (таблица work_sections): Фундамент, Основа, Стены, Окна, Двери, Веранда, Потолок, СанУзел, Электрика, Сантехника, Вентиляция, Общестрой',
+                    'work_type_id': 'Связь с видом работы (таблица work_types). Название работы без префикса раздела, например: "Установка свай", "Утепление 200мм"',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'project_materials_estimate': {
+                description: 'Ведомость материалов (СМЕТА). Список всех материалов, необходимых для выполнения проекта, с указанием запланированного количества и стоимости.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи материала',
+                    'project_id': 'Связь с проектом (таблица projects). Материал привязан к конкретному проекту.',
+                    'category': 'Категория материала (для группировки)',
+                    'material_name': 'Название материала',
+                    'unit_id': 'Связь с единицей измерения (таблица units): шт, м², кг и т.д.',
+                    'planned_quantity': 'Запланированное количество материала',
+                    'planned_price': 'Запланированная цена за единицу',
+                    'planned_cost': 'Запланированная общая стоимость (planned_quantity × planned_price)',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'project_journal': {
+                description: 'Журнал ведения работ (ежедневный учёт). Фиксирует ежедневное выполнение работ: кто работал, что делал, сколько времени потратил, какой объём выполнил.',
+                fields: {
+                    'id': 'Уникальный идентификатор записи в журнале',
+                    'project_id': 'Связь с проектом (таблица projects)',
+                    'date': 'Дата выполнения работы',
+                    'worker_name': 'ФИО работника, выполнявшего работу',
+                    'work_id': 'Связь с работой (таблица project_works). Какая работа выполнялась.',
+                    'hours': 'Количество отработанных часов',
+                    'quantity_completed': 'Количество/объём выполненной работы. Используется для автоматического расчёта прогресса.',
+                    'notes': 'Примечания и комментарии к записи',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'material_mapping': {
+                description: 'Справочник соответствий товаров (чек → смета). Используется для автоматического сопоставления названий товаров из чеков с материалами из сметы проекта.',
+                fields: {
+                    'id': 'Уникальный идентификатор соответствия',
+                    'receipt_name': 'Название товара как в чеке (из магазина)',
+                    'material_name': 'Название материала как в смете проекта',
+                    'project_id': 'Связь с проектом (таблица projects). Соответствие может быть привязано к конкретному проекту или быть общим.',
+                    'category': 'Категория материала',
+                    'unit_id': 'Связь с единицей измерения (таблица units)',
+                    'created_at': 'Дата и время создания записи',
+                    'updated_at': 'Дата и время последнего обновления'
+                }
+            },
+            'work_stages': {
+                description: 'Справочник этапов работ. Используется для классификации работ по этапам строительства: Тёплый контур, Отделка.',
+                fields: {
+                    'id': 'Уникальный идентификатор этапа',
+                    'name': 'Название этапа (уникальное): Тёплый контур, Отделка',
+                    'description': 'Описание этапа работ',
+                    'sort_order': 'Порядок сортировки этапов при отображении',
+                    'created_at': 'Дата и время создания записи'
+                }
+            },
+            'work_sections': {
+                description: 'Справочник разделов работ. Используется для классификации работ по разделам: Фундамент, Основа, Стены, Окна, Двери, Веранда, Потолок, СанУзел, Электрика, Сантехника, Вентиляция, Общестрой.',
+                fields: {
+                    'id': 'Уникальный идентификатор раздела',
+                    'name': 'Полное название раздела (уникальное)',
+                    'alias': 'Сокращение для отображения (например: ВЕНТ, Эл, СУ, Сантех). Может быть NULL для разделов без сокращения.',
+                    'description': 'Описание раздела',
+                    'sort_order': 'Порядок сортировки разделов при отображении',
+                    'created_at': 'Дата и время создания записи'
+                }
+            },
+            'work_types': {
+                description: 'Справочник видов работ. Хранит уникальные названия работ без префикса раздела, например: "Установка свай", "Утепление 200мм", "Имитация внутри".',
+                fields: {
+                    'id': 'Уникальный идентификатор вида работы',
+                    'name': 'Название вида работы (уникальное, без префикса раздела)',
+                    'description': 'Описание вида работы',
+                    'created_at': 'Дата и время создания записи'
+                }
+            }
+        };
+        
+        // Загрузка списка таблиц
+        async function loadTables() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/db-info/tables`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const tables = await response.json();
+                
+                const listContainer = document.getElementById('tables-list');
+                if (tables.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">Таблицы не найдены</div>';
+                    return;
+                }
+                
+                listContainer.innerHTML = tables.map(table => `
+                    <div class="table-item" onclick="loadTableInfo('${table.table_name}', this)">
+                        <span>${table.table_name}</span>
+                        <span class="table-count">${table.column_count}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки таблиц:', error);
+                document.getElementById('tables-list').innerHTML = 
+                    `<div class="error">Ошибка загрузки: ${error.message}<br><small>Проверьте, что бэкенд запущен на порту 3000</small></div>`;
+            }
+        }
+        
+        // Загрузка информации о таблице
+        async function loadTableInfo(tableName, element) {
+            // Обновляем активный элемент в списке
+            document.querySelectorAll('.table-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+            
+            const detailsContainer = document.getElementById('table-details');
+            detailsContainer.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/db-info/tables/${tableName}/columns`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                renderTableInfo(data);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки информации о таблице:', error);
+                detailsContainer.innerHTML = 
+                    `<div class="error">Ошибка загрузки данных: ${error.message}</div>`;
+            }
+        }
+        
+        // Отображение информации о таблице
+        function renderTableInfo(data) {
+            const container = document.getElementById('table-details');
+            const tableDesc = tableDescriptions[data.table_name];
+            
+            let html = `
+                <div class="table-info">
+                    <h1 class="table-title">📋 ${data.table_name}</h1>
+            `;
+            
+            // Описание таблицы
+            if (tableDesc && tableDesc.description) {
+                html += `
+                    <div class="table-description">
+                        <strong>📝 Назначение таблицы:</strong><br>
+                        ${tableDesc.description}
+                    </div>
+                `;
+            }
+            
+            // Создаём мапу примеров по именам полей
+            const examplesMap = {};
+            if (data.examples && data.examples.length > 0) {
+                data.examples.forEach(example => {
+                    Object.keys(example).forEach(key => {
+                        if (!examplesMap[key]) {
+                            examplesMap[key] = [];
+                        }
+                        const value = example[key];
+                        if (value !== null && value !== undefined && value !== '') {
+                            examplesMap[key].push(value);
+                        }
+                    });
+                });
+            }
+            
+            // Таблица полей
+            html += `
+                <table class="fields-table">
+                    <thead>
+                        <tr>
+                            <th>Поле</th>
+                            <th>Тип данных</th>
+                            <th>Связано с</th>
+                            <th>Описание</th>
+                            <th>Пример</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.columns.forEach(col => {
+                const fieldDesc = tableDesc && tableDesc.fields ? tableDesc.fields[col.column_name] : (col.comment || '—');
+                
+                // Формируем строку с типами и метками
+                let typeStr = col.data_type;
+                if (col.max_length) {
+                    typeStr += `(${col.max_length})`;
+                }
+                const badges = [];
+                if (col.is_primary_key) badges.push('<span class="badge-small badge-pk">PK</span>');
+                if (col.foreign_key) badges.push('<span class="badge-small badge-fk">FK</span>');
+                if (col.is_nullable) badges.push('<span class="badge-small badge-nullable">NULL</span>');
+                else badges.push('<span class="badge-small badge-not-null">NOT NULL</span>');
+                
+                // Формируем связь
+                let relationStr = '—';
+                if (col.foreign_key) {
+                    relationStr = `<span class="link-cell" onclick="loadTableInfo('${col.foreign_key.foreign_table}')">${col.foreign_key.foreign_table}.${col.foreign_key.foreign_column}</span>`;
+                }
+                
+                // Формируем пример
+                let exampleStr = '—';
+                if (examplesMap[col.column_name] && examplesMap[col.column_name].length > 0) {
+                    // Берём первый уникальный пример
+                    const uniqueExamples = [...new Set(examplesMap[col.column_name])].slice(0, 2);
+                    exampleStr = uniqueExamples.join(', ');
+                    if (examplesMap[col.column_name].length > 2) {
+                        exampleStr += '...';
+                    }
+                }
+                
+                html += `
+                    <tr>
+                        <td>
+                            <strong>${col.column_name}</strong>
+                            ${badges.length > 0 ? `<div class="badge-cell">${badges.join('')}</div>` : ''}
+                        </td>
+                        <td>${typeStr}</td>
+                        <td>${relationStr}</td>
+                        <td>${fieldDesc}</td>
+                        <td class="example-cell">${exampleStr}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            // Индексы (внизу)
+            if (data.indexes && data.indexes.length > 0) {
+                html += `
+                    <div class="indexes">
+                        <h3>Индексы:</h3>
+                        ${data.indexes.map(idx => 
+                            `<div class="example-row">${idx.indexname}:\n${idx.indexdef}</div>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTables();
+        });
+    </script>
+</body>
+</html>

@@ -11,12 +11,24 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    📚
+                </a>
+            </h1>
             <nav class="nav">
-                <a href="taiga.html" class="nav-link">Объекты</a>
-                <a href="income.html" class="nav-link active">Доходы</a>
-                <a href="expenses.html" class="nav-link">Расходы</a>
-                <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link active">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
             </nav>
         </header>
 

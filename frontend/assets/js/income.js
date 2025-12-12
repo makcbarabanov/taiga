@@ -180,6 +180,12 @@ document.getElementById('add-income-form').addEventListener('submit', async (e) 
         await incomeAPI.create(data);
         closeAddIncomeModal();
         await loadIncome();
+        if (typeof updateCashInNavigation === 'function') {
+            updateCashInNavigation();
+        }
+        if (typeof updateTodayCash === 'function') {
+            await updateTodayCash();
+        }
         alert('Доход успешно добавлен!');
     } catch (error) {
         console.error('Ошибка добавления дохода:', error);
@@ -196,11 +202,18 @@ async function deleteIncome(id) {
     try {
         await incomeAPI.delete(id);
         await loadIncome();
+        if (typeof updateCashInNavigation === 'function') {
+            updateCashInNavigation();
+        }
+        if (typeof updateTodayCash === 'function') {
+            await updateTodayCash();
+        }
         alert('Доход успешно удалён!');
     } catch (error) {
         console.error('Ошибка удаления дохода:', error);
         alert('Ошибка удаления дохода');
     }
 }
+
 
 

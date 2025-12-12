@@ -47,7 +47,7 @@ async function loadCashHistory() {
             console.error('Элемент cash-tbody не найден');
             return;
         }
-        tbody.innerHTML = '<tr><td colspan="5" class="loading">Загрузка...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">Загрузка...</td></tr>';
         
         cashHistory = await cashAPI.getAll();
         await renderCashHistory();
@@ -61,7 +61,7 @@ async function loadCashHistory() {
         const tbody = document.getElementById('cash-tbody');
         if (tbody) {
             tbody.innerHTML = 
-                '<tr><td colspan="5" class="empty-state">Ошибка загрузки данных: ' + error.message + '</td></tr>';
+                '<tr><td colspan="6" class="empty-state">Ошибка загрузки данных: ' + error.message + '</td></tr>';
         }
     }
 }
@@ -74,6 +74,30 @@ function formatCashNumber(num) {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(n);
+}
+
+// Вычисление расхода за день
+async function calculateDailyExpenses(date) {
+    try {
+        const expenses = await expensesAPI.getAll();
+        const dateStr = date instanceof Date 
+            ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+            : date;
+        
+        const dailyTotal = expenses
+            .filter(exp => {
+                const expDate = exp.date instanceof Date 
+                    ? `${exp.date.getFullYear()}-${String(exp.date.getMonth() + 1).padStart(2, '0')}-${String(exp.date.getDate()).padStart(2, '0')}`
+                    : exp.date;
+                return expDate === dateStr;
+            })
+            .reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        
+        return dailyTotal;
+    } catch (error) {
+        console.error('Ошибка вычисления расхода за день:', error);
+        return 0;
+    }
 }
 
 // Отображение истории кассы
@@ -105,6 +129,7 @@ async function renderCashHistory() {
     
     // Вычисляем расчётную сумму для сегодня
     let todayCalculated = 0;
+    let todayDailyExpenses = 0;
     if (!todayRecord) {
         // Если записи за сегодня нет, вычисляем расчётную сумму
         try {
@@ -115,6 +140,7 @@ async function renderCashHistory() {
             const totalExpenses = expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
             
             todayCalculated = totalIncome - totalExpenses;
+            todayDailyExpenses = await calculateDailyExpenses(today);
         } catch (error) {
             console.error('Ошибка вычисления расчётной суммы:', error);
         }
@@ -143,6 +169,7 @@ async function renderCashHistory() {
                     />
                 </td>
                 <td class="negative" id="diff-new-${Date.now()}">${formatCashNumber(-todayCalculated)} ₽</td>
+                <td>${formatCashNumber(todayDailyExpenses)} ₽</td>
                 <td>
                     <div style="display: flex; gap: 5px; align-items: center;">
                         <button 
@@ -150,7 +177,9 @@ async function renderCashHistory() {
                             id="save-btn-new-${Date.now()}"
                             onclick="saveCashRecord('new-${Date.now()}')"
                             title="Принять изменения"
-                            style="padding: 5px 10px; min-width: 30px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px;"
+                            style="padding: 4px 8px; background: none; color: #27ae60; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
+                            onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
                         >✓</button>
                     </div>
                 </td>
@@ -196,6 +225,7 @@ async function renderCashHistory() {
                     />
                 </td>
                 <td class="negative" id="diff-${newId}">${formatCashNumber(-todayCalculated)} ₽</td>
+                <td>${formatCashNumber(todayDailyExpenses)} ₽</td>
                 <td>
                     <div style="display: flex; gap: 5px; align-items: center;">
                         <button 
@@ -203,7 +233,9 @@ async function renderCashHistory() {
                             id="save-btn-${newId}"
                             onclick="saveCashRecord('${newId}')"
                             title="Принять изменения"
-                            style="padding: 5px 10px; min-width: 30px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px;"
+                            style="padding: 4px 8px; background: none; color: #27ae60; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
+                            onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
+                            onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
                         >✓</button>
                     </div>
                 </td>
@@ -249,6 +281,8 @@ async function renderCashHistory() {
             
             const rowClass = isToday ? 'cash-today' : 'cash-past';
             
+            const dailyExpenses = parseFloat(item.daily_expenses) || 0;
+            
             return `
                 <tr data-id="${item.id}" class="${rowClass}">
                     <td>${formattedDate}</td>
@@ -266,6 +300,7 @@ async function renderCashHistory() {
                         />
                     </td>
                     <td class="${diffClass}" id="diff-${item.id}">${formatCashNumber(difference)} ₽</td>
+                    <td>${formatCashNumber(dailyExpenses)} ₽</td>
                     <td>
                         <div style="display: flex; gap: 5px; align-items: center;">
                             <button 
@@ -273,13 +308,17 @@ async function renderCashHistory() {
                                 id="save-btn-${item.id}"
                                 onclick="saveCashRecord(${item.id})"
                                 title="Принять изменения"
-                                style="padding: 5px 10px; min-width: 30px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px;"
+                                style="padding: 4px 8px; background: none; color: #27ae60; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
+                                onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
+                                onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
                             >✓</button>
                             <button 
                                 class="btn btn-danger" 
                                 onclick="deleteCashRecord(${item.id})"
                                 title="Удалить строку"
-                                style="padding: 5px 10px; min-width: 30px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 16px;"
+                                style="padding: 4px 8px; background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
+                                onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
+                                onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
                             >✕</button>
                         </div>
                     </td>
@@ -346,12 +385,14 @@ async function createNewCashRecord(actualValue, calculated) {
     
     const calculatedAmount = totalIncome - totalExpenses;
     const difference = actual - calculatedAmount;
+    const dailyExpenses = await calculateDailyExpenses(today);
     
     const data = {
         date: today,
         calculated_amount: calculatedAmount,
         actual_amount: actual,
         difference: difference,
+        daily_expenses: dailyExpenses,
         initial_balance: 0
     };
     

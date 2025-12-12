@@ -38,8 +38,8 @@
 ### Вариант B: Использовать существующий репозиторий
 
 Если репозиторий уже создан, просто запомни его URL:
-- `https://github.com/твой_username/taiga.git` (HTTPS)
-- `git@github.com:твой_username/taiga.git` (SSH)
+- `https://github.com/makcbarabanov/taiga.git` (HTTPS)
+- `git@github.com:makcbarabanov/taiga.git` (SSH)
 
 ---
 
@@ -51,8 +51,8 @@
 # 1. Перейти в директорию проекта
 cd E:\Forge\_projects\taiga
 
-# 2. Добавить remote (замени URL на свой!)
-git remote add origin https://github.com/твой_username/taiga.git
+# 2. Добавить remote
+git remote add origin https://github.com/makcbarabanov/taiga.git
 
 # 3. Проверить, что remote добавлен
 git remote -v
@@ -60,8 +60,8 @@ git remote -v
 
 **Должно показать:**
 ```
-origin  https://github.com/твой_username/taiga.git (fetch)
-origin  https://github.com/твой_username/taiga.git (push)
+origin  https://github.com/makcbarabanov/taiga.git (fetch)
+origin  https://github.com/makcbarabanov/taiga.git (push)
 ```
 
 ---
@@ -93,7 +93,7 @@ git push -u origin master
 
 ## ✅ Шаг 4: Проверка
 
-1. **Открой репозиторий на GitHub:** https://github.com/твой_username/taiga
+1. **Открой репозиторий на GitHub:** https://github.com/makcbarabanov/taiga
 2. **Проверь, что все файлы загружены**
 3. **Проверь, что README.md отображается корректно**
 
@@ -137,7 +137,7 @@ git push origin master
 git remote remove origin
 
 # Добавить заново
-git remote add origin https://github.com/твой_username/taiga.git
+git remote add origin https://github.com/makcbarabanov/taiga.git
 ```
 
 ### Ошибка: "failed to push some refs"
@@ -162,7 +162,7 @@ git push origin master
 2. **Или настроить SSH ключ:**
    - Создать SSH ключ: `ssh-keygen -t ed25519 -C "твой_email@example.com"`
    - Добавить в GitHub: Settings → SSH and GPG keys → New SSH key
-   - Использовать SSH URL: `git@github.com:твой_username/taiga.git`
+   - Использовать SSH URL: `git@github.com:makcbarabanov/taiga.git`
 
 ---
 

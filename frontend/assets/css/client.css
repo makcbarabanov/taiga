@@ -2,6 +2,15 @@
    Стили для страницы клиента
    =========================================== */
 
+/* Выделение строк с нулевым количеством */
+.quantity-zero {
+    background-color: #ffebee !important; /* Слабокрасный */
+}
+
+.quantity-zero:hover {
+    background-color: #ffcdd2 !important;
+}
+
 .project-info {
     background: white;
     padding: 20px;
@@ -174,4 +183,146 @@
     padding: 10px;
     border-bottom: 2px solid var(--border-color);
 }
+
+/* Заголовок таблицы работ */
+.works-table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    gap: 15px;
+}
+
+.works-table-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.works-table-header .btn {
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* Sticky header для таблицы работ */
+#tab-works .table-container {
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+}
+
+#works-table thead.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+#works-table thead.sticky-header th {
+    background: var(--primary-color) !important;
+    color: white !important;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для таблицы табеля */
+#tab-timesheet .table-container {
+    max-height: calc(100vh - 300px);
+    overflow: auto;
+}
+
+#tab-timesheet .table {
+    table-layout: auto;
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+}
+
+#tab-timesheet .table th,
+#tab-timesheet .table td {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    white-space: nowrap;
+}
+
+#tab-timesheet .table th {
+    background: var(--primary-color);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+#tab-timesheet .table th:first-child,
+#tab-timesheet .table td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 5;
+}
+
+#tab-timesheet .table th:first-child {
+    background: var(--primary-color);
+    z-index: 15;
+}
+
+#tab-timesheet .table tr:nth-child(even) {
+    background: #f9f9f9;
+}
+
+#tab-timesheet .table tr:hover {
+    background: #f0f0f0;
+}
+
+/* Стили для таблицы журнала (единый стиль с расходами) */
+#tab-journal .table-container {
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#tab-journal .table {
+    table-layout: fixed;
+    width: 100%;
+    font-size: 12px;
+}
+
+#tab-journal .table th,
+#tab-journal .table td {
+    padding: 3px 8px;
+    vertical-align: top;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#tab-journal .table td {
+    height: auto;
+    line-height: 1.2;
+}
+
+/* Ширина колонок журнала */
+#tab-journal .table th:nth-child(1),
+#tab-journal .table td:nth-child(1) { width: 90px; min-width: 90px; } /* Дата */
+#tab-journal .table th:nth-child(2),
+#tab-journal .table td:nth-child(2) { width: 120px; min-width: 120px; } /* Время */
+#tab-journal .table th:nth-child(3),
+#tab-journal .table td:nth-child(3) { width: 50px; min-width: 50px; text-align: center; } /* Часов */
+#tab-journal .table th:nth-child(4),
+#tab-journal .table td:nth-child(4) { width: 200px; min-width: 200px; white-space: normal; } /* Сотрудники */
+#tab-journal .table th:nth-child(5),
+#tab-journal .table td:nth-child(5) { width: 250px; min-width: 250px; white-space: normal; } /* Работа */
+#tab-journal .table th:nth-child(6),
+#tab-journal .table td:nth-child(6) { width: 70px; min-width: 70px; text-align: right; } /* Выполнено */
+#tab-journal .table th:nth-child(7),
+#tab-journal .table td:nth-child(7) { width: 60px; min-width: 60px; text-align: center; } /* Ед. изм. */
+#tab-journal .table th:nth-child(8),
+#tab-journal .table td:nth-child(8) { width: 70px; min-width: 70px; text-align: right; } /* Осталось */
+#tab-journal .table th:nth-child(9),
+#tab-journal .table td:nth-child(9) { width: 80px; min-width: 80px; text-align: center; } /* Действия */
 

@@ -12,21 +12,26 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🐯 Taiga - Система финансового учёта</h1>
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    📚
+                </a>
+            </h1>
             <nav class="nav">
-                <a href="taiga.html" class="nav-link">Объекты</a>
-                <a href="income.html" class="nav-link">Доходы</a>
-                <a href="expenses.html" class="nav-link">Расходы</a>
-                <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
             </nav>
         </header>
-
-        <!-- Project Info -->
-        <div class="project-info" id="project-info">
-            <h2 id="project-title">Загрузка...</h2>
-            <p id="project-client"></p>
-            <p id="project-status"></p>
-        </div>
 
         <!-- Tabs -->
         <div class="tabs">
@@ -65,13 +70,13 @@
 
             <!-- Tab: Работы -->
             <div id="tab-works" class="tab-content active">
-                <div class="tab-header">
-                    <h2>Опись работ</h2>
-                    <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
-                </div>
                 <div class="table-container">
-                    <table class="table">
-                        <thead>
+                    <div class="works-table-header">
+                        <h2 id="works-header-text" style="margin: 0; display: inline;">Опись работ</h2>
+                        <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
+                    </div>
+                    <table class="table" id="works-table">
+                        <thead class="sticky-header">
                             <tr>
                                 <th>Раздел</th>
                                 <th>Наименование работы</th>
@@ -163,16 +168,18 @@
                         <thead>
                             <tr>
                                 <th>Дата</th>
-                                <th>Рабочий</th>
-                                <th>Работа</th>
+                                <th>Время</th>
                                 <th>Часов</th>
+                                <th>Сотрудники</th>
+                                <th>Работа</th>
                                 <th>Выполнено</th>
-                                <th>Примечания</th>
+                                <th>Ед. изм.</th>
+                                <th>Осталось</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody id="journal-tbody">
-                            <tr><td colspan="7" class="loading">Загрузка...</td></tr>
+                            <tr><td colspan="9" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -184,20 +191,12 @@
                     <h2>Табель</h2>
                     <p class="tab-description">Формируется автоматически из журнала работ</p>
                 </div>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Дата</th>
-                                <th>Рабочий</th>
-                                <th>Работа</th>
-                                <th>Часов</th>
-                                <th>Выполнено</th>
-                                <th>Ед. изм.</th>
-                            </tr>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table class="table" id="timesheet-table">
+                        <thead id="timesheet-thead">
+                            <tr><td colspan="100" class="loading">Загрузка...</td></tr>
                         </thead>
                         <tbody id="timesheet-tbody">
-                            <tr><td colspan="6" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>

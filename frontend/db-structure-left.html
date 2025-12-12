@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список таблиц</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .header {
+            padding: 15px;
+            background: #00B0F0;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .table-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-item:hover {
+            background: #e3f2fd;
+        }
+        
+        .table-item.active {
+            background: #00B0F0;
+            color: white;
+        }
+        
+        .table-count {
+            font-size: 12px;
+            color: #666;
+            background: #e0e0e0;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        .table-item.active .table-count {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .loading, .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        📊 Таблицы в схеме taiga
+    </div>
+    <div id="tables-list">
+        <div class="loading">Загрузка...</div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        async function loadTables() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/db-info/tables`);
+                const tables = await response.json();
+                
+                const listContainer = document.getElementById('tables-list');
+                if (tables.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">Таблицы не найдены</div>';
+                    return;
+                }
+                
+                listContainer.innerHTML = tables.map(table => `
+                    <div class="table-item" onclick="selectTable('${table.table_name}', this)">
+                        <span>${table.table_name}</span>
+                        <span class="table-count">${table.column_count}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки таблиц:', error);
+                document.getElementById('tables-list').innerHTML = 
+                    '<div class="empty-state">Ошибка загрузки</div>';
+            }
+        }
+        
+        function selectTable(tableName, element) {
+            // Убираем активный класс со всех элементов
+            document.querySelectorAll('.table-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Добавляем активный класс к выбранному
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // Если элемент не передан, находим его
+                document.querySelectorAll('.table-item').forEach(item => {
+                    if (item.textContent.includes(tableName)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            // Отправляем сообщение в родительское окно
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: 'loadTable',
+                    tableName: tableName
+                }, '*');
+            }
+        }
+        
+        // Слушаем сообщения для программного выбора таблицы
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'selectTable') {
+                selectTable(event.data.tableName, null);
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTables();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Магазины</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    📚
+                </a>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link active">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="actions">
+                <h2>Справочник магазинов</h2>
+                <button class="btn btn-primary" onclick="openAddShopModal()">+ Добавить магазин</button>
+            </div>
+
+            <!-- Shops Table -->
+            <div class="table-container">
+                <table class="table" id="shops-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Название</th>
+                            <th>Телефон</th>
+                            <th>Адрес</th>
+                            <th>Часы работы</th>
+                            <th>Контактное лицо</th>
+                            <th style="width: 80px;">Сайт</th>
+                            <th style="width: 120px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shops-tbody">
+                        <tr><td colspan="8" class="loading">Загрузка...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add/Edit Shop -->
+    <div id="add-shop-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddShopModal()">&times;</span>
+            <h2 id="shop-modal-title">Добавить магазин</h2>
+            <form id="add-shop-form">
+                <input type="hidden" id="shop-id" name="id">
+                <div class="form-group">
+                    <label for="shop-name">Название *</label>
+                    <input type="text" id="shop-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="shop-phone">Телефон</label>
+                    <input type="text" id="shop-phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="shop-address">Адрес</label>
+                    <textarea id="shop-address" name="address" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="shop-working-hours">Часы работы</label>
+                    <input type="text" id="shop-working-hours" name="working_hours">
+                </div>
+                <div class="form-group">
+                    <label for="shop-contact-person">Контактное лицо</label>
+                    <input type="text" id="shop-contact-person" name="contact_person">
+                </div>
+                <div class="form-group">
+                    <label for="shop-website">Сайт</label>
+                    <input type="url" id="shop-website" name="website">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddShopModal()">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script src="assets/js/shops.js"></script>
+</body>
+</html>

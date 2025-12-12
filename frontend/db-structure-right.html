@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Детали таблицы</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+        
+        .table-info {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .table-title {
+            font-size: 24px;
+            color: #00B0F0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00B0F0;
+        }
+        
+        .column-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .column-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .column-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .column-badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .badge-pk {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .badge-fk {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .badge-nullable {
+            background: #2196f3;
+            color: white;
+        }
+        
+        .badge-not-null {
+            background: #f44336;
+            color: white;
+        }
+        
+        .column-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .detail-row {
+            margin: 8px 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 150px;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .foreign-key-link {
+            color: #00B0F0;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .foreign-key-link:hover {
+            text-decoration: underline;
+        }
+        
+        .comment {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .examples, .indexes {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .indexes {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        
+        .examples h3, .indexes h3 {
+            margin-bottom: 10px;
+            color: #2e7d32;
+        }
+        
+        .indexes h3 {
+            color: #1976d2;
+        }
+        
+        .example-row {
+            margin: 5px 0;
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .loading, .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="table-details">
+        <div class="empty-state">
+            <p>Выберите таблицу слева для просмотра структуры</p>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:3000/api';
+        
+        // Слушаем сообщения от родительского окна
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'loadTableInfo') {
+                loadTableInfo(event.data.tableName);
+            }
+        });
+        
+        // Загрузка информации о таблице
+        async function loadTableInfo(tableName) {
+            const detailsContainer = document.getElementById('table-details');
+            detailsContainer.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/db-info/tables/${tableName}/columns`);
+                const data = await response.json();
+                
+                renderTableInfo(data);
+                
+            } catch (error) {
+                console.error('Ошибка загрузки информации о таблице:', error);
+                detailsContainer.innerHTML = 
+                    '<div class="empty-state">Ошибка загрузки данных: ' + error.message + '</div>';
+            }
+        }
+        
+        // Отображение информации о таблице
+        function renderTableInfo(data) {
+            const container = document.getElementById('table-details');
+            
+            let html = `
+                <div class="table-info">
+                    <h1 class="table-title">📋 ${data.table_name}</h1>
+            `;
+            
+            // Колонки
+            data.columns.forEach(col => {
+                html += `
+                    <div class="column-item">
+                        <div class="column-header">
+                            <span class="column-name">${col.column_name}</span>
+                            ${col.is_primary_key ? '<span class="column-badge badge-pk">PK</span>' : ''}
+                            ${col.foreign_key ? '<span class="column-badge badge-fk">FK</span>' : ''}
+                            ${col.is_nullable ? '<span class="column-badge badge-nullable">NULL</span>' : '<span class="column-badge badge-not-null">NOT NULL</span>'}
+                        </div>
+                        <div class="column-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Тип данных:</span>
+                                <span class="detail-value">${col.data_type}${col.max_length ? `(${col.max_length})` : ''}</span>
+                            </div>
+                            ${col.default_value ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">По умолчанию:</span>
+                                    <span class="detail-value">${col.default_value}</span>
+                                </div>
+                            ` : ''}
+                            ${col.foreign_key ? `
+                                <div class="detail-row">
+                                    <span class="detail-label">Связано с:</span>
+                                    <span class="detail-value">
+                                        <span class="foreign-key-link" onclick="loadLinkedTable('${col.foreign_key.foreign_table}')">
+                                            ${col.foreign_key.foreign_table}.${col.foreign_key.foreign_column}
+                                        </span>
+                                    </span>
+                                </div>
+                            ` : ''}
+                            ${col.comment ? `
+                                <div class="comment">
+                                    <strong>Описание:</strong> ${col.comment}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Примеры данных
+            if (data.examples && data.examples.length > 0) {
+                html += `
+                    <div class="examples">
+                        <h3>Примеры данных (первые ${data.examples.length} строки):</h3>
+                        ${data.examples.map((example, idx) => {
+                            const exampleStr = JSON.stringify(example, null, 2);
+                            return `<div class="example-row">Строка ${idx + 1}:\n${exampleStr}</div>`;
+                        }).join('')}
+                    </div>
+                `;
+            }
+            
+            // Индексы
+            if (data.indexes && data.indexes.length > 0) {
+                html += `
+                    <div class="indexes">
+                        <h3>Индексы:</h3>
+                        ${data.indexes.map(idx => 
+                            `<div class="example-row">${idx.indexname}:\n${idx.indexdef}</div>`
+                        ).join('')}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        function loadLinkedTable(tableName) {
+            // Отправляем сообщение в родительское окно для выбора таблицы слева
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: 'selectTable',
+                    tableName: tableName
+                }, '*');
+                
+                // Загружаем информацию о таблице
+                loadTableInfo(tableName);
+            }
+        }
+    </script>
+</body>
+</html>
+

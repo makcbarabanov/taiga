@@ -109,24 +109,53 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const {
-            project_id, date, month, year, category_id, subcategory,
-            unit_id, quantity, price, amount, section, wallet, shop_id, comment
-        } = req.body;
+        const updateFields = [];
+        const values = [];
+        let paramCount = 1;
         
-        const result = await pool.query(
-            `UPDATE taiga.expenses
-             SET project_id = $1, date = $2, month = $3, year = $4, category_id = $5,
-                 subcategory = $6, unit_id = $7, quantity = $8, price = $9, amount = $10,
-                 section = $11, wallet = $12, shop_id = $13, comment = $14
-             WHERE id = $15
-             RETURNING *`,
-            [
-                project_id, date, month || null, year || null, category_id,
-                subcategory || null, unit_id || null, quantity || null, price || null,
-                amount, section || null, wallet || null, shop_id || null, comment || null, id
-            ]
-        );
+        // Строим динамический запрос только для переданных полей
+        const fields = {
+            project_id: req.body.project_id,
+            date: req.body.date,
+            month: req.body.month,
+            year: req.body.year,
+            category_id: req.body.category_id,
+            subcategory: req.body.subcategory,
+            unit_id: req.body.unit_id,
+            quantity: req.body.quantity,
+            price: req.body.price,
+            amount: req.body.amount,
+            section: req.body.section,
+            wallet: req.body.wallet,
+            shop_id: req.body.shop_id,
+            comment: req.body.comment
+        };
+        
+        for (const [key, value] of Object.entries(fields)) {
+            if (value !== undefined) {
+                updateFields.push(`${key} = $${paramCount}`);
+                // Для числовых полей и null сохраняем как есть, для строковых - null если пусто
+                if (value === null || value === '') {
+                    values.push(null);
+                } else if (['project_id', 'category_id', 'unit_id', 'month', 'year', 'shop_id'].includes(key)) {
+                    values.push(value ? parseInt(value) : null);
+                } else if (['quantity', 'price', 'amount'].includes(key)) {
+                    values.push(value ? parseFloat(value) : null);
+                } else {
+                    values.push(value);
+                }
+                paramCount++;
+            }
+        }
+        
+        if (updateFields.length === 0) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+        
+        values.push(id);
+        const query = `UPDATE taiga.expenses SET ${updateFields.join(', ')} WHERE id = $${paramCount} RETURNING *`;
+        
+        const result = await pool.query(query, values);
         
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Expense not found' });

@@ -49,13 +49,33 @@ body {
 }
 
 .header h1 {
-    color: var(--primary-color);
+    color: var(--secondary-color);
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
 }
 
 .nav {
     display: flex;
     gap: 15px;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.nav-left {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-left: auto;
 }
 
 .nav-link {
@@ -63,16 +83,48 @@ body {
     text-decoration: none;
     color: var(--text-color);
     border-radius: 4px;
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.2s;
+    white-space: nowrap;
+    display: inline-block;
 }
 
 .nav-link:hover {
     background: var(--bg-color);
+    transform: translate(-2px, -2px);
 }
 
 .nav-link.active {
     background: var(--secondary-color);
     color: white;
+}
+
+/* Ссылка на справочники (справа, другой цвет) */
+.nav-link.directory-link {
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.nav-link.directory-link:hover {
+    background: rgba(127, 140, 141, 0.1);
+    color: #5d6d7e;
+    transform: translate(-2px, -2px);
+}
+
+.nav-link.directory-link.active {
+    background: var(--secondary-color);
+    color: white !important;
+}
+
+.nav-link.directory-link.active:hover {
+    background: #2980b9;
+    color: white !important;
+}
+
+/* Сумма расходов в меню */
+.expenses-amount {
+    font-weight: 600;
+    color: var(--danger-color);
+    margin-left: 5px;
 }
 
 /* Стили для ссылки кассы в навигации */
@@ -146,6 +198,11 @@ body {
     background: #7f8c8d;
 }
 
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
 .btn-success {
     background: var(--success-color);
     color: white;
@@ -162,6 +219,139 @@ body {
     border-radius: 8px;
     box-shadow: var(--shadow);
     overflow-x: auto;
+    max-width: 100%;
+}
+
+/* Стили для таблицы магазинов */
+#shops-table {
+    table-layout: fixed;
+    width: 100%;
+    max-width: 100%;
+}
+
+#shops-table th:first-child,
+#shops-table td:first-child {
+    width: 50px;
+    min-width: 50px;
+    text-align: center;
+}
+
+#shops-table th:nth-child(2),
+#shops-table td:nth-child(2) {
+    width: 15%;
+    min-width: 150px;
+}
+
+#shops-table th:nth-child(3),
+#shops-table td:nth-child(3) {
+    width: 12%;
+    min-width: 120px;
+}
+
+#shops-table th:nth-child(4),
+#shops-table td:nth-child(4) {
+    width: 20%;
+    min-width: 180px;
+}
+
+#shops-table th:nth-child(5),
+#shops-table td:nth-child(5) {
+    width: 12%;
+    min-width: 120px;
+}
+
+#shops-table th:nth-child(6),
+#shops-table td:nth-child(6) {
+    width: 12%;
+    min-width: 120px;
+}
+
+#shops-table .website-cell {
+    width: 80px;
+    min-width: 80px;
+    text-align: center;
+    padding: 8px 4px;
+}
+
+#shops-table th:last-child,
+#shops-table td:last-child {
+    width: 120px;
+    min-width: 120px;
+}
+
+#shops-table .website-cell .icon-link,
+#shops-table .website-cell .icon-button {
+    display: inline-block;
+    margin: 0 2px;
+    font-size: 18px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 2px 4px;
+    vertical-align: middle;
+    transition: all 0.2s;
+}
+
+#shops-table .website-cell .icon-link:hover,
+#shops-table .website-cell .icon-button:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+#shops-table .website-cell .icon-button {
+    cursor: pointer;
+}
+
+/* Стили для кнопок действий */
+#shops-table .actions-cell {
+    text-align: center;
+    padding: 8px 4px;
+}
+
+#shops-table .action-btn {
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin: 0 2px;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+
+#shops-table .action-btn.edit-btn {
+    color: #2c3e50;
+}
+
+#shops-table .action-btn.edit-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+#shops-table .action-btn.delete-btn {
+    color: #e74c3c;
+}
+
+#shops-table .action-btn.delete-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+#shops-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#shops-table td:nth-child(4) {
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+#shops-table .phone-cell {
+    white-space: normal;
+    line-height: 1.6;
 }
 
 .table {
@@ -209,6 +399,16 @@ body {
     background-color: #e0f0ff;
 }
 
+/* Вертикальные разделители для таблицы кассы */
+#cash-table th:not(:last-child),
+#cash-table td:not(:last-child) {
+    border-right: 1px solid var(--border-color);
+}
+
+#cash-table thead th:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 /* Modal */
 .modal {
     display: none;
@@ -222,14 +422,74 @@ body {
     overflow: auto;
 }
 
+.modal-overlay {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
 .modal-content {
     background-color: white;
     margin: 5% auto;
-    padding: 30px;
+    padding: 0;
     border-radius: 8px;
     width: 90%;
-    max-width: 600px;
+    max-width: 700px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: var(--text-color);
+}
+
+.modal-body {
+    padding: 30px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 30px;
+    border-top: 1px solid var(--border-color);
 }
 
 .close {
@@ -286,6 +546,13 @@ body {
     margin-top: 20px;
 }
 
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
 /* Status badges */
 .status-badge {
     display: inline-block;
@@ -308,6 +575,16 @@ body {
 .status-badge.завершён {
     background: #d4edda;
     color: #155724;
+}
+
+.status-badge.status-active {
+    background: var(--success-color);
+    color: white;
+}
+
+.status-badge.status-inactive {
+    background: var(--danger-color);
+    color: white;
 }
 
 /* Loading */

@@ -102,6 +102,32 @@ window.updateCashInNavigation = async function() {
     }
 };
 
+// Загрузка и обновление суммы расходов в навигации (доступна глобально)
+window.updateExpensesInNavigation = async function() {
+    try {
+        const expensesLink = document.getElementById('expenses-nav-link');
+        if (!expensesLink) return;
+
+        const expenses = await expensesAPI.getAll();
+        const totalExpenses = expenses.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        
+        // Находим элемент для суммы расходов
+        let amountSpan = expensesLink.querySelector('.expenses-amount');
+        if (!amountSpan) {
+            // Добавляем пробел перед суммой
+            expensesLink.appendChild(document.createTextNode(' '));
+            amountSpan = document.createElement('span');
+            amountSpan.className = 'expenses-amount';
+            expensesLink.appendChild(amountSpan);
+        }
+        
+        amountSpan.textContent = formatCashNumber(totalExpenses);
+        
+    } catch (error) {
+        console.error('Ошибка загрузки суммы расходов:', error);
+    }
+};
+
 // Обновление кассы при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
     updateCashInNavigation();

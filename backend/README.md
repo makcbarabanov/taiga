@@ -34,17 +34,41 @@ PORT=3000
 
 ## 🚀 Запуск
 
-**Режим разработки (с автоперезагрузкой):**
-```bash
-npm run dev
+**Вариант 1: через PowerShell скрипт (рекомендуется):**
+```powershell
+cd E:\Forge\_projects\taiga\backend
+.\RUN.ps1
 ```
 
-**Продакшн:**
-```bash
+**Вариант 2: вручную:**
+```powershell
+cd E:\Forge\_projects\taiga\backend
+$env:PATH += ";C:\Program Files\nodejs\"
 npm start
 ```
 
+**Вариант 3: режим разработки (с автоперезагрузкой):**
+```powershell
+npm run dev
+```
+
 Сервер запустится на `http://localhost:3000`
+
+**Проверка:** Открой `http://localhost:3000/api/health` — должен вернуть `{"status": "ok", "message": "Taiga API is running"}`
+
+---
+
+## 🌐 Запуск Frontend
+
+**Через Python:**
+```powershell
+cd E:\Forge\_projects\taiga\frontend
+python -m http.server 8000
+```
+
+**Открой:** `http://localhost:8000/taiga.html`
+
+⚠️ **Важно:** Сервер должен запускаться из папки `frontend`, чтобы файлы находились в корне!
 
 ## 📡 API Endpoints
 
@@ -138,5 +162,6 @@ curl -X POST http://localhost:3000/api/income \
 
 **Forge 🔧**  
 *Строитель Цифровых Домов*
+
 
 

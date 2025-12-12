@@ -6,7 +6,10 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "import:feruz": "node import/import-feruz.js"
+    "import:feruz": "node import/import-feruz.js",
+    "import:works": "node import/import-works.js",
+    "setup:works": "node import/create-work-directories.js",
+    "classify": "node scripts/classify-expense.js"
   },
   "keywords": ["taiga", "api", "postgresql"],
   "author": "Forge",

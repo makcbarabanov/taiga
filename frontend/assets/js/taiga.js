@@ -133,7 +133,7 @@ document.getElementById('add-project-form').addEventListener('submit', async (e)
         await projectsAPI.create(data);
         closeAddProjectModal();
         await loadProjects();
-        alert('Объект успешно добавлен!');
+        // Объект добавлен, данные обновлены
     } catch (error) {
         console.error('Ошибка добавления объекта:', error);
         alert('Ошибка добавления объекта');
@@ -158,7 +158,7 @@ document.getElementById('add-client-form').addEventListener('submit', async (e) 
         closeAddClientModal();
         await loadClients();
         await loadProjects();
-        alert('Клиент успешно добавлен!');
+        // Клиент добавлен, данные обновлены
     } catch (error) {
         console.error('Ошибка добавления клиента:', error);
         alert('Ошибка добавления клиента');
@@ -174,11 +174,11 @@ async function deleteProject(id) {
     try {
         await projectsAPI.delete(id);
         await loadProjects();
-        alert('Объект успешно удалён!');
     } catch (error) {
         console.error('Ошибка удаления объекта:', error);
         alert('Ошибка удаления объекта');
     }
 }
+
 
 
