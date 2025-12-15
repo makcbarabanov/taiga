@@ -91,6 +91,37 @@
             color: var(--success-color);
             margin-top: 0;
         }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -100,9 +131,14 @@
             <h1>
                 <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
                 <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
-                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
-                    📚
-                </a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="rules.html" title="Правила записи расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                </div>
             </h1>
             <nav class="nav">
                 <div class="nav-left">
@@ -120,289 +156,105 @@
 
         <!-- Main Content -->
         <main class="main">
-            <div class="rules-content">
-                <h1>📝 Правила записи расходов по типам материалов</h1>
-
-                <p>Этот файл содержит правила форматирования расходов для разных типов материалов. Эти правила используются при добавлении расходов в режиме обучения ("expense learning mode").</p>
-
-                <p><strong>Важно:</strong> Эти правила применяются <strong>после</strong> определения категории расхода. Они описывают, как правильно заполнять поля "Подкатегория", "Единица измерения", "Количество" и "Комментарий" для разных типов материалов.</p>
-
-                <hr>
-
-                <div class="statistics-box">
-                    <h2>📊 Статистика обучения</h2>
-
-                    <h3>Текущая точность определения категорий: <span style="color: var(--warning-color); font-size: 1.2em;">~10%</span> (требуется обучение)</h3>
-
-                    <p><strong>Метод подсчёта:</strong> Учитываются только расходы, где пользователь подтвердил категорию коротким ответом "да" или "верно" <strong>на первый вопрос о категории</strong>, без дополнительных уточняющих вопросов от системы.</p>
-
-                    <p><strong>Последняя сессия (2025-12-11):</strong></p>
-                    <ul>
-                        <li>Всего расходов обработано: <strong>10</strong></li>
-                        <li>Определено без уточнений: <strong>~1</strong> ✅ (БЕЛТЕРМО - "категория верна")</li>
-                        <li>Потребовали уточнений: <strong>~9</strong> ❓</li>
-                        <li>Точность без уточнений: <strong>~10%</strong></li>
-                    </ul>
-
-                    <p><strong>История сессий:</strong></p>
-                    <ul>
-                        <li>2025-12-11: ~1/10 (~10%) - большинство расходов потребовали уточнений</li>
-                        <li>Цель: <strong>100% точность</strong> без уточняющих вопросов</li>
-                    </ul>
-
-                    <p><strong>Критерий завершения обучения:</strong></p>
-                    <ul>
-                        <li>✅ 3 раза подряд все расходы определены на 100% <strong>без уточняющих вопросов</strong></li>
-                        <li>✅ Нет ошибок классификации</li>
-                        <li>✅ Система не задаёт уточняющих вопросов</li>
-                    </ul>
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
                 </div>
-
-                <hr>
-
-                <h2>🎯 Правила определения категорий расходов</h2>
-
-                <h3>1. Маржа (личные деньги Макса)</h3>
-
-                <p><strong>КРИТИЧЕСКОЕ ПРАВИЛО:</strong></p>
-                <ul>
-                    <li><strong>Категория:</strong> Маржа</li>
-                    <li><strong>Подкатегория:</strong> ВСЕГДА "Барабанов М.В." (единственная подкатегория для Маржи)</li>
-                    <li><strong>Комментарий:</strong> ОБЯЗАТЕЛЬНО указывать, на что потрачены деньги (например: "массаж", "хозтовары (шапка, задярка) Лента", "абонплата за cursor")</li>
-                    <li><strong>Ключевые слова:</strong> "Макс", "Барабанов", "М.В."</li>
-                </ul>
-
-                <p><strong>Примеры:</strong></p>
-                <pre><code>Категория: Маржа
-Подкатегория: Барабанов М.В.
-Комментарий: массаж
-Сумма: 250₽</code></pre>
-
-                <p><strong>⚠️ ВАЖНО:</strong> Маржа НЕ используется для зарплаты Макса за работу. Для зарплаты используется категория "ФОТ".</p>
-
-                <hr>
-
-                <h3>2. ФОТ (фонд оплаты труда)</h3>
-
-                <p><strong>Правило:</strong></p>
-                <ul>
-                    <li><strong>Категория:</strong> ФОТ</li>
-                    <li><strong>Подкатегория:</strong> Имя сотрудника (из справочника сотрудников со статусом "Работает")</li>
-                    <li><strong>Ключевые слова:</strong> "Жура", "Даня", "Балуев", "Сирожутдин", "Алексей", "Жасур", "Хуснидин", "Ринат", "Фуркат"</li>
-                </ul>
-
-                <hr>
-
-                <h3>3. Материалы (Мат)</h3>
-
-                <p><strong>Правила определения:</strong></p>
-                <ul>
-                    <li><strong>Шаблон размеров:</strong> <code>\d+[хxXХ]\d+[хxXХ]\d+</code> (например: 50х150х6000, 25х100х6000)</li>
-                    <li><strong>Ключевые слова:</strong> "м²", "м2", "кг", "шт" (в контексте материалов)</li>
-                    <li><strong>Специфичные материалы:</strong> "профлист", "профнастил", "муфта", "кабель", "провод", "штукатурка", "грунт", "шпаклевка", "эмаль", "герметик", "клей", "бетон", "гипс", "пенополистирол", "сетка", "профиль", "саморезы", "гвозди", "арматура", "проволока", "дюбель"</li>
-                </ul>
-
-                <hr>
-
-                <h3>4. ТЗР (транспортно-заготовительные расходы)</h3>
-
-                <p><strong>Правила:</strong></p>
-                <ul>
-                    <li><strong>Ключевые слова:</strong> "Доставка", "Аренда", "Газель", "Разгрузка материала"</li>
-                    <li><strong>ВАЖНО:</strong> Каршеринг (Делимобиль, Яндекс Драйв) для доставки материалов → <strong>ТЗР</strong>, не Накладные</li>
-                </ul>
-
-                <hr>
-
-                <h3>5. Накладные расходы</h3>
-
-                <p><strong>Подкатегории:</strong></p>
-                <ul>
-                    <li><strong>Накладные - Бензин:</strong> "Бензин", "Татнефть", "Газпромнефть" (заправки)</li>
-                    <li><strong>Накладные - Продукты:</strong> "Продукты", "Пятёрочка", "Верный", "Магнит", "Дикси", "Шав24БМ", "Столовая"</li>
-                    <li><strong>Накладные - Транспорт:</strong> "Яндекс Драйв" (для личных поездок, не для доставки материалов)</li>
-                    <li><strong>Накладные - Метро:</strong> "Метро", "Местный транспорт"</li>
-                    <li><strong>Накладные - Связь:</strong> "Т-Мобайл", "Мобайл", "связь", "мобильная связь"</li>
-                    <li><strong>Накладные - Каршеринг:</strong> "Делимобиль" (только для личных поездок, не для доставки)</li>
-                </ul>
-
-                <p><strong>⚠️ ВАЖНО:</strong></p>
-                <ul>
-                    <li>Делимобиль для доставки материалов → <strong>ТЗР</strong></li>
-                    <li>Делимобиль для личных поездок → <strong>Накладные - Каршеринг</strong></li>
-                    <li>Яндекс Драйв → <strong>Накладные - Транспорт</strong> (личные поездки)</li>
-                </ul>
-
-                <hr>
-
-                <h3>6. Инструменты (Инструм)</h3>
-
-                <p><strong>Ключевые слова:</strong> "Перфоратор", "УШМ", "Пылесос", "домкрат", "Лопата", "Фонарь", "Прожектор"</p>
-
-                <hr>
-
-                <h3>7. Расходные материалы (Расход)</h3>
-
-                <p><strong>Ключевые слова:</strong> "мешки для мусора", "мешок", "шлифкруг", "шлифкруги", "Диск", "Нож", "Лезвия", "Круг абразивный"</p>
-
-                <hr>
-
-                <h2>🧱 БЕЛТЕРМО и Профлист</h2>
-
-                <h3>Правило записи:</h3>
-                <ul>
-                    <li><strong>Подкатегория:</strong> Указываем количество листов и полное описание материала
-                        <ul>
-                            <li>Пример: <code>БЕЛТЕРМО, Топ, 200кг/м³, 2490×590×20мм Шип-паз 30 листов</code></li>
-                            <li>Пример: <code>Профлист МП-20/С-20 25 листов</code></li>
-                        </ul>
-                    </li>
-                    <li><strong>Единица измерения:</strong> <code>м²</code> (квадратные метры)</li>
-                    <li><strong>Количество:</strong> Пересчитываем из листов в м²</li>
-                    <li><strong>Комментарий:</strong> Дополнительная информация (если нужна)</li>
-                </ul>
-
-                <h3>Обоснование:</h3>
-                <ul>
-                    <li>Количество в листах нужно для проверки по месту</li>
-                    <li>м² нужны для сравнения с конкурентными ценами</li>
-                </ul>
-
-                <p><strong>Пример:</strong></p>
-                <pre><code>Категория: Мат
-Подкатегория: БЕЛТЕРМО, Топ, 200кг/м³, 2490×590×20мм Шип-паз 30 листов
-Единица измерения: м²
-Количество: 44.07 м²
-Цена: 400₽/м²
-Сумма: 17 640₽</code></pre>
-
-                <hr>
-
-                <h2>🧱 Утеплители (минераловатные плиты)</h2>
-
-                <h3>Правило записи:</h3>
-                <ul>
-                    <li><strong>Подкатегория:</strong> Указываем количество упаковок и характеристики материала
-                        <ul>
-                            <li>Пример: <code>Минплита Кнауф 100х610х1300, уп=0,634м3=6,34м2</code></li>
-                            <li>В подкатегории указываем количество упаковок</li>
-                        </ul>
-                    </li>
-                    <li><strong>Единица измерения:</strong> <code>м³</code> (кубические метры)</li>
-                    <li><strong>Количество:</strong> Пересчитываем из упаковок в м³</li>
-                    <li><strong>Комментарий:</strong> Полное название материала из счёта (для алиасов в будущем)
-                        <ul>
-                            <li>Пример: <code>Кнауф Инсулейшн ПРОФ 037, 100х610х1300, 0,634 м3/уп 6,34 м2/уп, 22уп</code></li>
-                        </ul>
-                    </li>
-                </ul>
-
-                <h3>Обоснование:</h3>
-                <ul>
-                    <li>Количество в упаковках нужно для проверки по месту</li>
-                    <li>м³ нужны для сравнения с конкурентными ценами</li>
-                </ul>
-
-                <p><strong>Пример:</strong></p>
-                <pre><code>Категория: Мат
-Подкатегория: Минплита Кнауф 100х610х1300, уп=0,634м3=6,34м2
-Единица измерения: м³
-Количество: 13.948 м³ (22 упаковки × 0,634 м³/уп)
-Цена: 2 445₽/м³ (округлено от 2 444,79₽)
-Сумма: 34 100₽
-Комментарий: Кнауф Инсулейшн ПРОФ 037, 100х610х1300, 0,634 м3/уп 6,34 м2/уп, 22уп</code></pre>
-
-                <hr>
-
-                <h2>📋 Общие принципы</h2>
-
-                <ol>
-                    <li><strong>Подкатегория</strong> — краткое, но информативное описание материала с ключевыми характеристиками</li>
-                    <li><strong>Единица измерения</strong> — выбирается для удобства сравнения цен (м², м³, шт и т.д.)</li>
-                    <li><strong>Количество</strong> — всегда пересчитывается в выбранную единицу измерения</li>
-                    <li><strong>Комментарий</strong> — полное название из счёта/накладной (для будущей системы алиасов)</li>
-                    <li><strong>Форматирование цен:</strong>
-                        <ul>
-                            <li><strong>Цены выше 1 рубля</strong> → без десятичных, округление в большую сторону
-                                <ul>
-                                    <li>Пример: 2 444,79₽ → 2 445₽</li>
-                                    <li>Пример: 1 550,00₽ → 1 550₽</li>
-                                </ul>
-                            </li>
-                            <li><strong>Цены до 1 рубля</strong> → с десятичными
-                                <ul>
-                                    <li>Пример: 0,85₽ → 0,85₽</li>
-                                    <li>Пример: 0,50₽ → 0,50₽</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                </ol>
-
-                <hr>
-
-                <h2>🔄 Будущая система алиасов</h2>
-
-                <p>В будущем планируется система алиасов, где:</p>
-                <ul>
-                    <li><strong>Подкатегория</strong> — общее название товара (например, "Минплита Кнауф 100х610х1300")</li>
-                    <li><strong>Алиасы</strong> — различные названия одного и того же товара в разных магазинах
-                        <ul>
-                            <li>Пример: "Кнауф Инсулейшн ПРОФ 037" = "Кнауф ПРОФ 037" = "Кнауф Инсулейшн ПРОФ 037 (100х610х1300)"</li>
-                        </ul>
-                    </li>
-                    <li><strong>Комментарий</strong> — сохраняет оригинальное название из счёта для сопоставления с алиасами</li>
-                </ul>
-
-                <hr>
-
-                <h2>🎓 Процесс обучения</h2>
-
-                <h3>Этап 1: Получение чека с расходами</h3>
-                <p>Пользователь отправляет "чек" с расходами (текст, список позиций). Система получает список расходов для классификации.</p>
-
-                <h3>Этап 2: Определение категорий</h3>
-                <p>Система анализирует каждую позицию расхода, использует существующие правила из <code>expense_classification_rules</code> и определяет предполагаемую категорию для каждой позиции.</p>
-
-                <h3>Этап 3: Уточнение у пользователя</h3>
-                <ul>
-                    <li><strong>Система задаёт вопросы по одному</strong> (не все сразу)</li>
-                    <li>Каждый вопрос имеет счётчик (1, 2, 3...)</li>
-                    <li>Система спрашивает: "Правильно ли определена категория?"</li>
-                    <li>Пользователь подтверждает или исправляет категорию</li>
-                    <li><strong>После подтверждения</strong> система переходит к следующему вопросу</li>
-                    <li><strong>При малейшем сомнении</strong> система задаёт уточняющие вопросы</li>
-                    <li>Обсуждение происходит последовательно, пока не будет достигнуто 100% подтверждение всех расходов</li>
-                </ul>
-
-                <h3>Этап 4: Совершенствование правил</h3>
-                <p>При обнаружении ошибки или нового случая система анализирует, почему была ошибка, создаёт новое правило или обновляет существующее, и сохраняет правило в <code>expense_classification_rules</code> для будущего использования.</p>
-
-                <h3>Этап 5: Добавление расходов в Админку</h3>
-                <p>После достижения <strong>100% подтверждения</strong> всех расходов от пользователя система автоматически добавляет все расходы в Админку (таблица <code>expenses</code>). Каждый расход сохраняется с подтверждённой категорией и всеми данными.</p>
-
-                <hr>
-
-                <h2>⚠️ Критические правила (требуют особого внимания)</h2>
-
-                <ol>
-                    <li><strong>Маржа:</strong> ВСЕГДА подкатегория "Барабанов М.В.", комментарий ОБЯЗАТЕЛЕН</li>
-                    <li><strong>Делимобиль:</strong> Для доставки материалов → ТЗР, для личных поездок → Накладные</li>
-                    <li><strong>Яндекс Драйв:</strong> Всегда Накладные - Транспорт (личные поездки)</li>
-                    <li><strong>Метро:</strong> Всегда Накладные - Метро</li>
-                    <li><strong>Продукты:</strong> Всегда Накладные - Продукты</li>
-                </ol>
-
-                <hr>
-
-                <p style="color: #999; font-size: 0.9em; margin-top: 40px;"><em>Последнее обновление: 2025-12-11</em><br>
-                <em>Статистика обновляется после каждой сессии обучения</em></p>
             </div>
         </main>
     </div>
 
     <script src="assets/js/api.js"></script>
     <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
 </body>
 </html>
-

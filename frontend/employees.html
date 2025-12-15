@@ -14,9 +14,14 @@
             <h1>
                 <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
                 <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
-                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
-                    📚
-                </a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="rules.html" title="Правила записи расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                </div>
             </h1>
             <nav class="nav">
                 <div class="nav-left">
@@ -36,7 +41,13 @@
         <main class="main">
             <div class="actions">
                 <h2>Справочник сотрудников</h2>
-                <button class="btn btn-primary" onclick="openAddEmployeeModal()">+ Добавить сотрудника</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                        <input type="checkbox" id="show-dismissed" onchange="toggleDismissedEmployees()" checked>
+                        <span>Показывать уволенных</span>
+                    </label>
+                    <button class="btn btn-primary" onclick="openAddEmployeeModal()">+ Добавить сотрудника</button>
+                </div>
             </div>
 
             <!-- Employees Table -->
@@ -46,12 +57,13 @@
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>ФИО</th>
+                            <th>Алиас</th>
                             <th>Должность</th>
                             <th>Телефон</th>
                             <th>Тип занятости</th>
                             <th>Статус</th>
-                            <th>Дата трудоустройства</th>
-                            <th>Дата увольнения</th>
+                            <th style="width: auto; white-space: nowrap;">Дата трудоустройства</th>
+                            <th style="width: auto; white-space: nowrap;">Дата увольнения</th>
                             <th style="width: 120px;">Действия</th>
                         </tr>
                     </thead>
@@ -65,14 +77,17 @@
 
     <!-- Modal: Add/Edit Employee -->
     <div id="add-employee-modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeAddEmployeeModal()">&times;</span>
-            <h2 id="employee-modal-title">Добавить сотрудника</h2>
-            <form id="add-employee-form">
+        <div class="modal-content employee-modal">
+            <div class="modal-header">
+                <h2 id="employee-modal-title">Добавить сотрудника</h2>
+                <button class="modal-close" onclick="closeAddEmployeeModal()" type="button">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-employee-form">
                 <input type="hidden" id="employee-id" name="id">
                 <div class="form-group">
-                    <label for="employee-last-name">Фамилия *</label>
-                    <input type="text" id="employee-last-name" name="last_name" required>
+                    <label for="employee-last-name">Фамилия</label>
+                    <input type="text" id="employee-last-name" name="last_name">
                 </div>
                 <div class="form-group">
                     <label for="employee-first-name">Имя *</label>
@@ -81,6 +96,10 @@
                 <div class="form-group">
                     <label for="employee-middle-name">Отчество</label>
                     <input type="text" id="employee-middle-name" name="middle_name">
+                </div>
+                <div class="form-group">
+                    <label for="employee-alias">Алиас (сокращённое имя)</label>
+                    <input type="text" id="employee-alias" name="alias" placeholder="например: Макс, Жура, Даня">
                 </div>
                 <div class="form-group">
                     <label for="employee-position">Должность</label>
@@ -107,6 +126,19 @@
                     <input type="date" id="employee-dismissal-date" name="dismissal_date">
                 </div>
                 <div class="form-group">
+                    <label for="employee-status">Статус</label>
+                    <select id="employee-status" name="status">
+                        <option value="Работает">Работает</option>
+                        <option value="Уволен">Уволен</option>
+                        <option value="Кандидат">Кандидат</option>
+                        <option value="Запас">Запас</option>
+                        <option value="Консультант">Консультант</option>
+                        <option value="Подрядчик">Подрядчик</option>
+                        <option value="Временный">Временный</option>
+                        <option value="Не указан">Не указан</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="employee-address-actual">Адрес фактический</label>
                     <textarea id="employee-address-actual" name="address_actual" rows="2"></textarea>
                 </div>
@@ -118,11 +150,12 @@
                     <label for="employee-comment">Комментарий</label>
                     <textarea id="employee-comment" name="comment" rows="3"></textarea>
                 </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Добавить</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeAddEmployeeModal()">Отмена</button>
-                </div>
-            </form>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddEmployeeModal()">Отмена</button>
+                <button type="submit" form="add-employee-form" class="btn btn-primary">Сохранить</button>
+            </div>
         </div>
     </div>
 

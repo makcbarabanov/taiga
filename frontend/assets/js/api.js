@@ -127,12 +127,23 @@ const cashAPI = {
 };
 
 // Форматирование чисел
+// Правило: цифры до 1 - с десятичными долями, от 1 и выше - без десятичных
 function formatNumber(num) {
     if (num === null || num === undefined) return '-';
-    return new Intl.NumberFormat('ru-RU', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(num);
+    const absNum = Math.abs(num);
+    if (absNum < 1) {
+        // Меньше 1 - с десятичными долями
+        return new Intl.NumberFormat('ru-RU', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(num);
+    } else {
+        // От 1 и выше - без десятичных долей
+        return new Intl.NumberFormat('ru-RU', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(num);
+    }
 }
 
 // Форматирование даты
@@ -194,5 +205,23 @@ const employeesAPI = {
     create: (data) => api.post('/employees', data),
     update: (id, data) => api.put(`/employees/${id}`, data),
     delete: (id) => api.delete(`/employees/${id}`)
+};
+
+const learningSessionsAPI = {
+    async getAll() {
+        return api.get('/learning-sessions');
+    },
+    async create(data) {
+        return api.post('/learning-sessions', data);
+    },
+    async update(id, data) {
+        return api.put(`/learning-sessions/${id}`, data);
+    }
+};
+
+const rulesAPI = {
+    getAll: () => api.get('/rules'),
+    getById: (id) => api.get(`/rules/${id}`),
+    update: (id, data) => api.put(`/rules/${id}`, data)
 };
 

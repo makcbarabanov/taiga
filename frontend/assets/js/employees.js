@@ -45,7 +45,20 @@ function renderEmployees() {
         return;
     }
     
-    tbody.innerHTML = employees.map((employee, index) => {
+    // Фильтруем сотрудников в зависимости от настройки
+    // Показываем только активных (Работает, Кандидат, Запас, Консультант, Подрядчик, Временный)
+    // если чекбокс выключен
+    const showDismissed = document.getElementById('show-dismissed') ? document.getElementById('show-dismissed').checked : true;
+    const filteredEmployees = showDismissed 
+        ? employees 
+        : employees.filter(emp => emp.status !== 'Уволен' && emp.status !== 'Не указан');
+    
+    if (filteredEmployees.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="empty-state">Нет сотрудников</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = filteredEmployees.map((employee, index) => {
         // Формируем ФИО
         const fullName = [
             employee.last_name || '',
@@ -69,18 +82,29 @@ function renderEmployees() {
             statusClass = 'status-active';
         } else if (employee.status === 'Уволен') {
             statusClass = 'status-inactive';
+        } else if (employee.status === 'Кандидат') {
+            statusClass = 'status-candidate';
+        } else if (employee.status === 'Запас') {
+            statusClass = 'status-reserve';
+        } else if (employee.status === 'Консультант') {
+            statusClass = 'status-consultant';
+        } else if (employee.status === 'Подрядчик') {
+            statusClass = 'status-contractor';
+        } else if (employee.status === 'Временный') {
+            statusClass = 'status-temporary';
         }
         
         return `
         <tr>
             <td>${index + 1}</td>
             <td><strong>${escapeHtml(fullName)}</strong></td>
+            <td>${escapeHtml(employee.alias || '-')}</td>
             <td>${escapeHtml(employee.position || '-')}</td>
             <td class="phone-cell">${phoneDisplay}</td>
             <td>${escapeHtml(employee.employment_type || '-')}</td>
             <td><span class="status-badge ${statusClass}">${escapeHtml(employee.status || 'Не указан')}</span></td>
-            <td>${hireDate}</td>
-            <td>${dismissalDate}</td>
+            <td style="white-space: nowrap;">${hireDate}</td>
+            <td style="white-space: nowrap;">${dismissalDate}</td>
             <td class="actions-cell">
                 <button 
                     onclick="editEmployee(${employee.id})"
@@ -149,6 +173,7 @@ async function editEmployee(id) {
         document.getElementById('employee-employment-type').value = employee.employment_type || 'постоянно';
         document.getElementById('employee-hire-date').value = employee.hire_date || '';
         document.getElementById('employee-dismissal-date').value = employee.dismissal_date || '';
+        document.getElementById('employee-status').value = employee.status || 'Не указан';
         document.getElementById('employee-address-actual').value = employee.address_actual || '';
         document.getElementById('employee-address-registration').value = employee.address_registration || '';
         document.getElementById('employee-comment').value = employee.comment || '';
@@ -195,7 +220,7 @@ document.getElementById('add-employee-form').addEventListener('submit', async (e
         .filter(p => p);
     
     const data = {
-        last_name: formData.get('last_name'),
+        last_name: formData.get('last_name') || null,
         first_name: formData.get('first_name'),
         middle_name: formData.get('middle_name') || null,
         position: formData.get('position') || null,
@@ -203,6 +228,7 @@ document.getElementById('add-employee-form').addEventListener('submit', async (e
         employment_type: formData.get('employment_type') || 'постоянно',
         hire_date: formData.get('hire_date') || null,
         dismissal_date: formData.get('dismissal_date') || null,
+        status: formData.get('status') || 'Не указан',
         address_actual: formData.get('address_actual') || null,
         address_registration: formData.get('address_registration') || null,
         comment: formData.get('comment') || null
@@ -223,6 +249,11 @@ document.getElementById('add-employee-form').addEventListener('submit', async (e
     }
 });
 
+// Переключение отображения уволенных сотрудников
+function toggleDismissedEmployees() {
+    renderEmployees();
+}
+
 // Закрытие модального окна при клике вне его
 window.onclick = function(event) {
     const modal = document.getElementById('add-employee-modal');
@@ -230,6 +261,8 @@ window.onclick = function(event) {
         closeAddEmployeeModal();
     }
 };
+
+
 
 
 

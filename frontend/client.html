@@ -15,9 +15,14 @@
             <h1>
                 <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
                 <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
-                <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
-                    📚
-                </a>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="rules.html" title="Правила записи расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                </div>
             </h1>
             <nav class="nav">
                 <div class="nav-left">
@@ -82,11 +87,10 @@
                                 <th>Наименование работы</th>
                                 <th>Ед. изм.</th>
                                 <th>Кол-во</th>
-                                <th>Прогресс (%)</th>
                             </tr>
                         </thead>
                         <tbody id="works-tbody">
-                            <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                            <tr><td colspan="4" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -102,30 +106,28 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Категория</th>
-                                <th>Наименование</th>
-                                <th>Ед. изм.</th>
-                                <th colspan="3">Смета</th>
-                                <th colspan="3">Факт</th>
-                                <th>Разница</th>
-                                <th>Действия</th>
+                                <th rowspan="2">Наименование</th>
+                                <th rowspan="2">Ед. изм.</th>
+                                <th colspan="3" style="text-align: center;">Смета</th>
+                                <th colspan="3" style="text-align: center;">Факт</th>
+                                <th colspan="2" style="text-align: center;">Докупить</th>
+                                <th>Выгода</th>
+                                <th rowspan="2"></th>
                             </tr>
                             <tr>
-                                <th></th>
-                                <th></th>
-                                <th></th>
                                 <th>Кол-во</th>
                                 <th>Цена</th>
                                 <th>Ст-сть</th>
                                 <th>Кол-во</th>
                                 <th>Цена</th>
                                 <th>Ст-сть</th>
-                                <th></th>
+                                <th>Кол-во</th>
+                                <th>Ст-сть</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody id="materials-tbody">
-                            <tr><td colspan="11" class="loading">Загрузка...</td></tr>
+                            <tr><td colspan="12" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>

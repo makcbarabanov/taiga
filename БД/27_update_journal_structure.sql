@@ -68,24 +68,33 @@ CREATE INDEX IF NOT EXISTS idx_project_journal_workers_employee_id ON taiga.proj
 -- ===========================================
 CREATE OR REPLACE FUNCTION taiga.update_work_progress()
 RETURNS TRIGGER AS $$
+DECLARE
+    work_quantity DECIMAL(10, 2);
+    total_completed DECIMAL(10, 2);
+    calculated_progress DECIMAL(5, 2);
 BEGIN
+    -- Получаем количество работы и сумму выполненных
+    SELECT pw.quantity, COALESCE((
+        SELECT SUM(quantity_completed)
+        FROM taiga.project_journal pj
+        WHERE pj.work_id = COALESCE(NEW.work_id, OLD.work_id)
+    ), 0)
+    INTO work_quantity, total_completed
+    FROM taiga.project_works pw
+    WHERE pw.id = COALESCE(NEW.work_id, OLD.work_id);
+    
+    -- Рассчитываем прогресс, ограничивая максимумом 100%
+    calculated_progress := CASE
+        WHEN work_quantity > 0 THEN
+            LEAST(ROUND(total_completed / work_quantity * 100, 2), 100.00)
+        ELSE 0
+    END;
+    
     -- Обновляем completed_quantity и progress_percent для работы
     UPDATE taiga.project_works pw
     SET 
-        completed_quantity = COALESCE((
-            SELECT SUM(quantity_completed)
-            FROM taiga.project_journal pj
-            WHERE pj.work_id = COALESCE(NEW.work_id, OLD.work_id)
-        ), 0),
-        progress_percent = CASE
-            WHEN pw.quantity > 0 THEN
-                ROUND(COALESCE((
-                    SELECT SUM(quantity_completed)
-                    FROM taiga.project_journal pj
-                    WHERE pj.work_id = COALESCE(NEW.work_id, OLD.work_id)
-                ), 0) / pw.quantity * 100, 2)
-            ELSE 0
-        END,
+        completed_quantity = total_completed,
+        progress_percent = calculated_progress,
         updated_at = NOW()
     WHERE pw.id = COALESCE(NEW.work_id, OLD.work_id);
     

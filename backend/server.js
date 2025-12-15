@@ -32,6 +32,8 @@ app.use('/api/project-journal', require('./routes/projectJournal'));
 app.use('/api/project-timesheet', require('./routes/projectTimesheet'));
 app.use('/api/db-info', require('./routes/dbInfo'));
 app.use('/api/expense-classification', require('./routes/expenseClassification'));
+app.use('/api/rules', require('./routes/rules'));
+app.use('/api/learning-sessions', require('./routes/learningSessions'));
 
 // Health check
 app.get('/api/health', (req, res) => {

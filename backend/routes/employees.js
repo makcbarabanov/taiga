@@ -51,24 +51,24 @@ router.post('/', async (req, res) => {
     try {
         const {
             last_name, first_name, middle_name, address_actual, address_registration,
-            phone_numbers, hire_date, dismissal_date, position, employment_type, comment
+            phone_numbers, hire_date, dismissal_date, status, position, employment_type, comment
         } = req.body;
         
-        if (!last_name || !first_name) {
-            return res.status(400).json({ error: 'Last name and first name are required' });
+        if (!first_name) {
+            return res.status(400).json({ error: 'First name is required' });
         }
         
         const result = await pool.query(
             `INSERT INTO taiga.employees 
              (last_name, first_name, middle_name, address_actual, address_registration,
-              phone_numbers, hire_date, dismissal_date, position, employment_type, comment)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+              phone_numbers, hire_date, dismissal_date, status, position, employment_type, comment)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
              RETURNING *`,
             [
-                last_name, first_name || null, middle_name || null,
+                last_name || null, first_name, middle_name || null,
                 address_actual || null, address_registration || null,
                 phone_numbers || [], hire_date || null, dismissal_date || null,
-                position || null, employment_type || 'постоянно', comment || null
+                status || null, position || null, employment_type || 'постоянно', comment || null
             ]
         );
         
@@ -96,6 +96,7 @@ router.put('/:id', async (req, res) => {
             phone_numbers: req.body.phone_numbers,
             hire_date: req.body.hire_date,
             dismissal_date: req.body.dismissal_date,
+            status: req.body.status,
             position: req.body.position,
             employment_type: req.body.employment_type,
             comment: req.body.comment
@@ -153,6 +154,8 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 

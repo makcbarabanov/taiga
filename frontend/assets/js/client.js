@@ -39,7 +39,8 @@ async function loadUnits() {
 // Загрузка сотрудников
 async function loadEmployees() {
     try {
-        employees = await employeesAPI.getAll({ status: 'Работает' });
+        // Загружаем всех сотрудников (без фильтра по статусу)
+        employees = await employeesAPI.getAll();
     } catch (error) {
         console.error('Ошибка загрузки сотрудников:', error);
     }
@@ -150,7 +151,7 @@ function renderWorks(worksList) {
     const tbody = document.getElementById('works-tbody');
     
     if (!worksList || worksList.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Нет работ</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><p>Нет работ</p></td></tr>';
         return;
     }
     
@@ -169,16 +170,27 @@ function renderWorks(worksList) {
     });
     
     let html = '';
-    // Сортируем разделы для правильного отображения
-    const sortedSections = Object.keys(grouped).sort();
+    // Сортируем разделы по минимальному sort_order в разделе
+    const sortedSections = Object.keys(grouped).sort((a, b) => {
+        const minOrderA = Math.min(...grouped[a].map(w => parseFloat(w.sort_order) || 9999));
+        const minOrderB = Math.min(...grouped[b].map(w => parseFloat(w.sort_order) || 9999));
+        return minOrderA - minOrderB;
+    });
     
     sortedSections.forEach(section => {
-        html += `<tr class="section-header"><td colspan="5"><strong>${section}</strong></td></tr>`;
-        grouped[section].forEach(work => {
+        html += `<tr class="section-header"><td colspan="4"><strong>${section}</strong></td></tr>`;
+        // Сортируем работы внутри раздела по sort_order
+        const sortedWorks = grouped[section].sort((a, b) => {
+            const orderA = parseFloat(a.sort_order) || 9999;
+            const orderB = parseFloat(b.sort_order) || 9999;
+            return orderA - orderB;
+        });
+        sortedWorks.forEach(work => {
             // Используем данные из представления
             const unitName = work.unit_short_name || work.unit_name || '-';
-            const progress = parseFloat(work.progress_percent) || 0;
-            const progressClass = progress >= 100 ? 'success' : progress >= 50 ? 'warning' : 'danger';
+            let progress = parseFloat(work.progress_percent) || 0;
+            // Ограничиваем прогресс максимумом 100% для корректного отображения
+            progress = Math.min(progress, 100);
             // Выделяем слабокрасным, если quantity = 0
             const rowClass = (parseFloat(work.quantity) || 0) === 0 ? 'quantity-zero' : '';
             
@@ -204,19 +216,15 @@ function renderWorks(worksList) {
                 }
             }
             
+            // Создаём стиль для прогресс-бара в строке
+            const progressStyle = `background: linear-gradient(to right, #d4edda ${progress}%, transparent ${progress}%);`;
+            
             html += `
-                <tr class="${rowClass}">
+                <tr class="${rowClass} work-progress-row" style="${progressStyle}">
                     <td>${work.section_alias || work.section_name || ''}</td>
                     <td>${workName}</td>
                     <td>${unitName}</td>
                     <td>${formatNumber(work.quantity)}</td>
-                    <td>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${progressClass}" style="width: ${progress}%">
-                                ${progress}%
-                            </div>
-                        </div>
-                    </td>
                 </tr>
             `;
         });
@@ -254,7 +262,7 @@ function renderMaterials(estimate, expenses) {
     const tbody = document.getElementById('materials-tbody');
     
     if (estimate.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="empty-state"><p>Нет материалов в смете</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><p>Нет материалов в смете</p></td></tr>';
         return;
     }
     
@@ -280,7 +288,7 @@ function renderMaterials(estimate, expenses) {
     
     let html = '';
     Object.keys(grouped).forEach(category => {
-        html += `<tr class="section-header"><td colspan="11"><strong>${category}</strong></td></tr>`;
+        html += `<tr class="section-header"><td colspan="12"><strong>${category}</strong></td></tr>`;
         grouped[category].forEach(mat => {
             const unit = mat.unit_id ? units.find(u => u.id === mat.unit_id) : null;
             const unitName = unit ? (unit.short_name || unit.name) : '-';
@@ -291,23 +299,41 @@ function renderMaterials(estimate, expenses) {
             const factAmount = factExpenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
             const factPrice = factQuantity > 0 ? factAmount / factQuantity : 0;
             
-            const diff = (parseFloat(mat.planned_cost) || 0) - factAmount;
-            const diffClass = diff >= 0 ? 'positive' : 'negative';
+            // Разница в количестве (докупить)
+            const plannedQty = parseFloat(mat.planned_quantity) || 0;
+            const remainingQty = plannedQty - factQuantity;
+            const remainingQtyClass = remainingQty > 0 ? 'positive' : (remainingQty < 0 ? 'negative' : '');
+            
+            // Стоимость дозакупа = ещё.кол-во * смета.цена
+            const plannedPrice = parseFloat(mat.planned_price) || 0;
+            const remainingCost = remainingQty > 0 ? remainingQty * plannedPrice : 0;
+            const remainingCostClass = remainingQty > 0 ? 'positive' : (remainingQty < 0 ? 'negative' : '');
+            
+            // Выгода рассчитывается только если количество сметы и факта совпадают (докупить = 0)
+            const canCalculateSavings = Math.abs(remainingQty) < 0.01; // Учитываем погрешность округления
+            let savings = 0;
+            let savingsClass = '';
+            if (canCalculateSavings && factQuantity > 0) {
+                savings = (parseFloat(mat.planned_cost) || 0) - factAmount;
+                savingsClass = savings >= 0 ? 'positive' : 'negative';
+            }
             
             html += `
                 <tr>
-                    <td></td>
                     <td>${mat.material_name}</td>
                     <td>${unitName}</td>
                     <td>${formatNumber(mat.planned_quantity)}</td>
-                    <td>${formatNumber(mat.planned_price)} ₽</td>
-                    <td>${formatNumber(mat.planned_cost)} ₽</td>
+                    <td>${formatNumber(mat.planned_price)}</td>
+                    <td>${formatNumber(mat.planned_cost)}</td>
                     <td>${formatNumber(factQuantity)}</td>
-                    <td>${factQuantity > 0 ? formatNumber(factPrice) + ' ₽' : '-'}</td>
-                    <td>${factAmount > 0 ? formatNumber(factAmount) + ' ₽' : '-'}</td>
-                    <td class="${diffClass}">${formatNumber(diff)} ₽</td>
-                    <td>
-                        <button class="btn btn-danger" onclick="deleteMaterial(${mat.id})">Удалить</button>
+                    <td>${factQuantity > 0 ? formatNumber(factPrice) : '-'}</td>
+                    <td>${factAmount > 0 ? formatNumber(factAmount) : '-'}</td>
+                    <td class="${remainingQtyClass}">${formatNumber(remainingQty)}</td>
+                    <td class="${remainingCostClass}">${remainingQty > 0 ? formatNumber(remainingCost) : '-'}</td>
+                    <td class="${savingsClass}">${canCalculateSavings && factQuantity > 0 ? formatNumber(savings) : '-'}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn edit-btn" onclick="editMaterial(${mat.id})" title="Редактировать">✏️</button>
+                        <button class="action-btn delete-btn" onclick="deleteMaterial(${mat.id})" title="Удалить">✕</button>
                     </td>
                 </tr>
             `;
@@ -333,11 +359,11 @@ function updateMaterialsSummary(estimate, expenses) {
     const remaining = plannedCost - factAmount;
     
     document.getElementById('total-materials').textContent = totalMaterials;
-    document.getElementById('planned-cost').textContent = formatNumber(plannedCost) + ' ₽';
+    document.getElementById('planned-cost').textContent = formatNumber(plannedCost);
     document.getElementById('purchased-count').textContent = purchasedCount;
     document.getElementById('supply-percent').textContent = formatNumber(supplyPercent) + '%';
-    document.getElementById('savings').textContent = formatNumber(savings) + ' ₽';
-    document.getElementById('remaining').textContent = formatNumber(remaining) + ' ₽';
+    document.getElementById('savings').textContent = formatNumber(savings);
+    document.getElementById('remaining').textContent = formatNumber(remaining);
 }
 
 // ===========================================
@@ -453,25 +479,17 @@ function renderJournal(journal) {
                 <td>${completedStr}</td>
                 <td>${unitDisplay}</td>
                 <td>${remaining}</td>
-                <td>
-                    <div style="display: flex; gap: 5px; align-items: center;">
-                        <button 
-                            class="btn btn-success" 
-                            onclick="openEditJournalModal(${entry.id})"
-                            title="Редактировать"
-                            style="padding: 4px 8px; background: none; color: #27ae60; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
-                            onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
-                            onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
-                        >✓</button>
-                        <button 
-                            class="btn btn-danger" 
-                            onclick="deleteJournalEntry(${entry.id})"
-                            title="Удалить"
-                            style="padding: 4px 8px; background: none; color: #e74c3c; border: none; cursor: pointer; font-size: 18px; transition: all 0.2s;"
-                            onmouseover="this.style.opacity='0.7'; this.style.transform='scale(1.1)'"
-                            onmouseout="this.style.opacity='1'; this.style.transform='scale(1)'"
-                        >✕</button>
-                    </div>
+                <td class="actions-cell">
+                    <button 
+                        onclick="openEditJournalModal(${entry.id})"
+                        title="Редактировать"
+                        class="action-btn edit-btn"
+                    >✏️</button>
+                    <button 
+                        onclick="deleteJournalEntry(${entry.id})"
+                        title="Удалить"
+                        class="action-btn delete-btn"
+                    >✕</button>
                 </td>
             </tr>
         `;
@@ -527,12 +545,42 @@ function renderTimesheet(journal, expenses) {
         return h % 1 === 0 ? h.toString() : h.toFixed(1).replace('.', ',');
     }
     
+    // Функция для нормализации даты (с учётом локального часового пояса)
+    function normalizeDate(dateValue) {
+        if (!dateValue) return null;
+        
+        // Всегда парсим через Date, чтобы получить правильную локальную дату
+        // Это важно, так как даты из БД могут быть в UTC (например, "2025-12-11T21:00:00.000Z"),
+        // а нам нужна локальная дата (например, "2025-12-12" для UTC+3)
+        const date = new Date(dateValue);
+        if (isNaN(date.getTime())) return null;
+        
+        // Используем локальные методы для получения правильной даты в локальном часовом поясе
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
     // Получаем все уникальные даты из журнала
     const allDates = new Set();
-    journal.forEach(entry => {
+    const dateDebug = [];
+    journal.forEach((entry, index) => {
         if (entry.date) {
-            const date = new Date(entry.date);
-            allDates.add(date.toISOString().split('T')[0]);
+            const originalDate = entry.date;
+            const dateStr = normalizeDate(entry.date);
+            dateDebug.push({
+                index,
+                original: originalDate,
+                normalized: dateStr,
+                employees: entry.employees ? entry.employees.map(e => e.full_name || `${e.last_name} ${e.first_name}`.trim()).join(', ') : 'нет',
+                contractor: entry.notes && entry.notes.includes('Подрядчик') ? entry.notes.replace('Подрядчик', '').trim() : null
+            });
+            if (dateStr) {
+                allDates.add(dateStr);
+            } else {
+                console.warn('Не удалось нормализовать дату:', originalDate, entry);
+            }
         }
     });
     
@@ -559,10 +607,12 @@ function renderTimesheet(journal, expenses) {
     const contractorData = {};
     
     journal.forEach(entry => {
-        const dateStr = entry.date ? new Date(entry.date).toISOString().split('T')[0] : null;
+        // Обрабатываем дату через функцию нормализации
+        const dateStr = normalizeDate(entry.date);
         if (!dateStr) return;
         
-        const hours = parseFloat(entry.hours) || 0;
+        // Часы могут быть null/undefined, но запись всё равно должна учитываться как смена
+        const hours = entry.hours !== null && entry.hours !== undefined ? parseFloat(entry.hours) : 0;
         
         // Обрабатываем сотрудников
         if (entry.employees && Array.isArray(entry.employees) && entry.employees.length > 0) {
@@ -579,8 +629,10 @@ function renderTimesheet(journal, expenses) {
                     };
                 }
                 
+                // Добавляем смену (даже если hours = 0)
                 employeeData[empName].shifts.add(dateStr);
                 employeeData[empName].totalHours += hours;
+                // Если для этой даты уже есть часы, суммируем; иначе устанавливаем
                 employeeData[empName].hoursByDate[dateStr] = (employeeData[empName].hoursByDate[dateStr] || 0) + hours;
             });
         }
@@ -598,6 +650,7 @@ function renderTimesheet(journal, expenses) {
                     };
                 }
                 
+                // Добавляем смену (даже если hours = 0)
                 contractorData[contractorName].shifts.add(dateStr);
                 contractorData[contractorName].totalHours += hours;
                 contractorData[contractorName].hoursByDate[dateStr] = (contractorData[contractorName].hoursByDate[dateStr] || 0) + hours;
@@ -665,8 +718,13 @@ function renderTimesheet(journal, expenses) {
                 <td>${worker.avgRate > 0 ? new Intl.NumberFormat('ru-RU').format(worker.avgRate) : ''}</td>
                 <td>${formatHoursDecimal(worker.totalHours)}</td>
                 ${sortedDates.map(date => {
-                    const hours = worker.hoursByDate[date] || 0;
-                    return `<td>${hours > 0 ? formatHoursDecimal(hours) : '0'}</td>`;
+                    const hours = worker.hoursByDate[date];
+                    // Если есть запись для этой даты (даже с 0 часов), показываем часы, иначе 0
+                    if (hours !== undefined && hours !== null) {
+                        return `<td>${hours > 0 ? formatHoursDecimal(hours) : '0'}</td>`;
+                    } else {
+                        return `<td>0</td>`;
+                    }
                 }).join('')}
             </tr>
         `;
@@ -777,17 +835,77 @@ function openJournalModal(entry = null) {
             ? entry.notes.replace('Подрядчик', '').trim() 
             : '';
         
-        // Создаём чекбоксы для сотрудников
-        const employeesCheckboxes = employees.map(emp => {
-            const fullName = `${emp.last_name || ''} ${emp.first_name || ''} ${emp.middle_name || ''}`.trim();
-            const isChecked = selectedEmployeeIds.includes(emp.id);
-            return `
-            <label style="display: block; margin: 5px 0;">
-                <input type="checkbox" name="employees" value="${emp.id}" ${isChecked ? 'checked' : ''}>
-                ${fullName}
-            </label>
+        // Определяем цвета статусов
+        const statusColors = {
+            'Работает': '#5cb85c',
+            'Уволен': '#d9534f',
+            'Кандидат': '#f0ad4e',
+            'Запас': '#5bc0de',
+            'Консультант': '#9b59b6',
+            'Подрядчик': '#e67e22',
+            'Временный': '#95a5a6',
+            'Не указан': '#95a5a6'
+        };
+        
+        // Получаем уникальные статусы из списка сотрудников
+        const uniqueStatuses = [...new Set(employees.map(emp => emp.status || 'Не указан'))].sort();
+        
+        // Создаём фильтр статусов
+        const statusFilterHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button type="button" class="status-filter-btn" data-status="all" style="padding: 6px 12px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">
+                    Все
+                </button>
+                ${uniqueStatuses.map(status => {
+                    const color = statusColors[status] || '#95a5a6';
+                    const isDefault = status === 'Работает' || status === 'Подрядчик';
+                    const size = isDefault ? '24px' : '12px';
+                    return `
+                        <div style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin: 0 2px;">
+                            <button type="button" 
+                                    class="status-filter-btn ${isDefault ? 'active' : ''}" 
+                                    data-status="${status}"
+                                    title="${status}"
+                                    style="width: ${size}; height: ${size}; border-radius: 50%; border: 2px solid ${color}; background: ${color}; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
+                            </button>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
         `;
-        }).join('');
+        
+        // Функция для фильтрации сотрудников
+        function filterEmployeesByStatus(selectedStatuses) {
+            if (selectedStatuses.includes('all')) {
+                return employees;
+            }
+            return employees.filter(emp => selectedStatuses.includes(emp.status || 'Не указан'));
+        }
+        
+        // Начальные выбранные статусы (по умолчанию)
+        let selectedStatuses = ['Работает', 'Подрядчик'];
+        
+        // Функция для рендеринга списка сотрудников
+        function renderEmployeesList(filteredEmployees) {
+            if (filteredEmployees.length === 0) {
+                return '<div style="padding: 20px; text-align: center; color: #999;">Нет сотрудников с выбранными статусами</div>';
+            }
+            return filteredEmployees.map((emp, index) => {
+                const fullName = `${emp.last_name || ''} ${emp.first_name || ''} ${emp.middle_name || ''}`.trim();
+                const isChecked = selectedEmployeeIds.includes(emp.id);
+                const isLast = index === filteredEmployees.length - 1;
+                return `
+                <label style="display: flex; align-items: center; gap: 10px; padding: 10px 4px; ${!isLast ? 'border-bottom: 1px solid #e8e8e8;' : ''} cursor: pointer; transition: background 0.2s;">
+                    <input type="checkbox" name="employees" value="${emp.id}" ${isChecked ? 'checked' : ''} style="margin: 0; cursor: pointer; width: 18px; height: 18px; flex-shrink: 0;">
+                    <span style="flex: 1; user-select: none;">${fullName}</span>
+                </label>
+            `;
+            }).join('');
+        }
+        
+        // Изначально отфильтрованный список
+        let filteredEmployees = filterEmployeesByStatus(selectedStatuses);
+        let employeesCheckboxes = renderEmployeesList(filteredEmployees);
     
     // Форматируем дату для input[type="date"]
     const dateValue = entry ? entry.date : new Date().toISOString().split('T')[0];
@@ -827,17 +945,22 @@ function openJournalModal(entry = null) {
                         
                         <div class="form-group">
                             <label>Сотрудники (или укажите подрядчика ниже)</label>
-                            <div style="max-height: 150px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;">
+                            ${statusFilterHTML}
+                            <div id="employees-list-container" style="max-height: 200px; overflow-y: auto; border: 2px solid #e0e0e0; padding: 4px 8px; border-radius: 8px; background: white;">
                                 ${employeesCheckboxes}
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label>Работа *</label>
-                            <select name="work_id" required>
+                            <select name="work_id" id="journal-work-select" required>
                                 <option value="">Выберите работу</option>
                                 ${worksOptions}
                             </select>
+                            <div id="work-quantity-hint" style="margin-top: 8px; padding: 8px; background-color: #f0f0f0; border-radius: 4px; font-size: 13px; display: none;">
+                                <div><strong>Информация о работе:</strong></div>
+                                <div id="work-quantity-info"></div>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -884,6 +1007,164 @@ function openJournalModal(entry = null) {
     timeStartInput.addEventListener('change', updateHours);
     timeEndInput.addEventListener('change', updateHours);
     breakDurationInput.addEventListener('input', updateHours);
+    
+    // Обработчик изменения выбора работы - показываем подсказку с количеством
+    const workSelect = document.getElementById('journal-work-select');
+    const workHint = document.getElementById('work-quantity-hint');
+    const workInfo = document.getElementById('work-quantity-info');
+    
+    workSelect.addEventListener('change', () => {
+        const selectedWorkId = parseInt(workSelect.value);
+        if (selectedWorkId && works.length > 0) {
+            const selectedWork = works.find(w => w.id === selectedWorkId);
+            if (selectedWork) {
+                const plannedQty = parseFloat(selectedWork.quantity) || 0;
+                const completedQty = parseFloat(selectedWork.completed_quantity) || 0;
+                const remainingQty = plannedQty - completedQty;
+                const unitName = selectedWork.unit_short_name || selectedWork.unit_name || '';
+                
+                let infoHTML = '';
+                if (plannedQty > 0) {
+                    infoHTML = `
+                        <div style="margin-top: 4px;">Всего в смете: <strong>${formatNumber(plannedQty)} ${unitName}</strong></div>
+                        <div style="margin-top: 4px;">Уже выполнено: <strong>${formatNumber(completedQty)} ${unitName}</strong></div>
+                        <div style="margin-top: 4px; color: ${remainingQty > 0 ? '#d9534f' : '#5cb85c'};">
+                            Осталось: <strong>${formatNumber(remainingQty)} ${unitName}</strong>
+                        </div>
+                    `;
+                } else {
+                    infoHTML = '<div style="color: #d9534f;">⚠️ Количество в смете не указано</div>';
+                }
+                
+                workInfo.innerHTML = infoHTML;
+                workHint.style.display = 'block';
+            } else {
+                workHint.style.display = 'none';
+            }
+        } else {
+            workHint.style.display = 'none';
+        }
+    });
+    
+    // Если редактируем запись, сразу показываем подсказку
+    if (entry && entry.work_id) {
+        workSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Обработчики для фильтра статусов сотрудников
+    const statusFilterBtns = document.querySelectorAll(`#${modalId} .status-filter-btn`);
+    const employeesListContainer = document.getElementById('employees-list-container');
+    
+    // Сохраняем функции и переменные для использования в обработчиках
+    const currentSelectedStatuses = { value: [...selectedStatuses] };
+    
+    statusFilterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const status = this.getAttribute('data-status');
+            const statusColorsMap = {
+                'Работает': '#5cb85c',
+                'Уволен': '#d9534f',
+                'Кандидат': '#f0ad4e',
+                'Запас': '#5bc0de',
+                'Консультант': '#9b59b6',
+                'Подрядчик': '#e67e22',
+                'Временный': '#95a5a6',
+                'Не указан': '#95a5a6'
+            };
+            
+            function filterEmployeesByStatus(selectedStatuses) {
+                if (selectedStatuses.includes('all')) {
+                    return employees;
+                }
+                return employees.filter(emp => selectedStatuses.includes(emp.status || 'Не указан'));
+            }
+            
+            function renderEmployeesList(filteredEmployees) {
+                if (filteredEmployees.length === 0) {
+                    return '<div style="padding: 20px; text-align: center; color: #999;">Нет сотрудников с выбранными статусами</div>';
+                }
+                return filteredEmployees.map((emp, index) => {
+                    const fullName = `${emp.last_name || ''} ${emp.first_name || ''} ${emp.middle_name || ''}`.trim();
+                    const isChecked = selectedEmployeeIds.includes(emp.id);
+                    const isLast = index === filteredEmployees.length - 1;
+                    return `
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px 4px; ${!isLast ? 'border-bottom: 1px solid #e8e8e8;' : ''} cursor: pointer; transition: background 0.2s;">
+                        <input type="checkbox" name="employees" value="${emp.id}" ${isChecked ? 'checked' : ''} style="margin: 0; cursor: pointer; width: 18px; height: 18px; flex-shrink: 0;">
+                        <span style="flex: 1; user-select: none;">${fullName}</span>
+                    </label>
+                `;
+                }).join('');
+            }
+            
+            if (status === 'all') {
+                // Если нажата кнопка "Все", сбрасываем все фильтры
+                currentSelectedStatuses.value = ['all'];
+                statusFilterBtns.forEach(b => {
+                    if (b.getAttribute('data-status') === 'all') {
+                        b.classList.add('active');
+                        b.style.borderColor = '#3498db';
+                        b.style.background = '#3498db';
+                        b.style.color = 'white';
+                    } else {
+                        b.classList.remove('active');
+                        const statusName = b.getAttribute('data-status');
+                        const color = statusColorsMap[statusName] || '#95a5a6';
+                        b.style.width = '12px';
+                        b.style.height = '12px';
+                        b.style.borderColor = color;
+                        b.style.background = color;
+                    }
+                });
+            } else {
+                // Убираем "all" из выбранных, если он был
+                if (currentSelectedStatuses.value.includes('all')) {
+                    currentSelectedStatuses.value = [];
+                    const allBtn = document.querySelector(`#${modalId} .status-filter-btn[data-status="all"]`);
+                    if (allBtn) {
+                        allBtn.classList.remove('active');
+                        allBtn.style.borderColor = '#ddd';
+                        allBtn.style.background = 'white';
+                        allBtn.style.color = 'inherit';
+                    }
+                }
+                
+                // Переключаем статус
+                if (currentSelectedStatuses.value.includes(status)) {
+                    currentSelectedStatuses.value = currentSelectedStatuses.value.filter(s => s !== status);
+                    this.classList.remove('active');
+                    const color = statusColorsMap[status] || '#95a5a6';
+                    this.style.width = '12px';
+                    this.style.height = '12px';
+                    this.style.borderColor = color;
+                    this.style.background = color;
+                } else {
+                    currentSelectedStatuses.value.push(status);
+                    this.classList.add('active');
+                    const color = statusColorsMap[status] || '#95a5a6';
+                    this.style.width = '24px';
+                    this.style.height = '24px';
+                    this.style.borderColor = color;
+                    this.style.background = color;
+                }
+            }
+            
+            // Если ничего не выбрано, выбираем "Все"
+            if (currentSelectedStatuses.value.length === 0) {
+                currentSelectedStatuses.value = ['all'];
+                const allBtn = document.querySelector(`#${modalId} .status-filter-btn[data-status="all"]`);
+                if (allBtn) {
+                    allBtn.classList.add('active');
+                    allBtn.style.borderColor = '#3498db';
+                    allBtn.style.background = '#3498db';
+                    allBtn.style.color = 'white';
+                }
+            }
+            
+            // Обновляем список сотрудников
+            const filtered = filterEmployeesByStatus(currentSelectedStatuses.value);
+            employeesListContainer.innerHTML = renderEmployeesList(filtered);
+        });
+    });
     
     // Обработчик отправки формы
     document.getElementById('journal-form').addEventListener('submit', async (e) => {
@@ -977,6 +1258,10 @@ async function deleteWork(id) {
         console.error('Ошибка удаления:', error);
         alert('Ошибка удаления');
     }
+}
+
+function editMaterial(id) {
+    openAddMaterialModal(id);
 }
 
 async function deleteMaterial(id) {

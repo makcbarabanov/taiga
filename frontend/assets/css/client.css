@@ -11,6 +11,16 @@
     background-color: #ffcdd2 !important;
 }
 
+/* Прогресс-бар в строке работ */
+.work-progress-row {
+    position: relative;
+}
+
+.work-progress-row td {
+    position: relative;
+    z-index: 1;
+}
+
 .project-info {
     background: white;
     padding: 20px;
@@ -325,4 +335,208 @@
 #tab-journal .table td:nth-child(8) { width: 70px; min-width: 70px; text-align: right; } /* Осталось */
 #tab-journal .table th:nth-child(9),
 #tab-journal .table td:nth-child(9) { width: 80px; min-width: 80px; text-align: center; } /* Действия */
+
+/* Стили для кнопок действий в журнале (как в магазинах) */
+#tab-journal .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+#tab-journal .action-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+#tab-journal .action-btn.edit-btn {
+    color: #2c3e50;
+}
+
+#tab-journal .action-btn.edit-btn:hover {
+    color: #2c3e50;
+}
+
+#tab-journal .action-btn.delete-btn {
+    color: #e74c3c;
+}
+
+#tab-journal .action-btn.delete-btn:hover {
+    color: #c0392b;
+}
+
+#tab-journal .actions-cell {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Стили для таблицы СНАБ */
+#tab-materials .table-container {
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+#tab-materials .table {
+    table-layout: auto;
+    width: 100%;
+    font-size: 12px;
+}
+
+#tab-materials .table th,
+#tab-materials .table td {
+    padding: 3px 2px;
+    vertical-align: top;
+    border-right: 1px solid var(--border-color);
+}
+
+#tab-materials .table th:last-child,
+#tab-materials .table td:last-child {
+    border-right: none;
+}
+
+/* Ширина колонок СНАБ */
+#tab-materials .table th:nth-child(1),
+#tab-materials .table td:nth-child(1) { 
+    width: 100%; /* Наименование - самая широкая, занимает всё оставшееся место */
+    padding: 3px 8px;
+} 
+
+#tab-materials .table th:nth-child(2),
+#tab-materials .table td:nth-child(2) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Ед. изм. */
+
+#tab-materials .table th:nth-child(3),
+#tab-materials .table td:nth-child(3) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Кол-во (Смета) */
+
+#tab-materials .table th:nth-child(4),
+#tab-materials .table td:nth-child(4) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Цена (Смета) */
+
+#tab-materials .table th:nth-child(5),
+#tab-materials .table td:nth-child(5) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Ст-сть (Смета) */
+
+#tab-materials .table th:nth-child(6),
+#tab-materials .table td:nth-child(6) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Кол-во (Факт) */
+
+#tab-materials .table th:nth-child(7),
+#tab-materials .table td:nth-child(7) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Цена (Факт) */
+
+#tab-materials .table th:nth-child(8),
+#tab-materials .table td:nth-child(8) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Ст-сть (Факт) */
+
+#tab-materials .table th:nth-child(9),
+#tab-materials .table td:nth-child(9) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Разница */
+
+#tab-materials .table th:nth-child(10),
+#tab-materials .table td:nth-child(10) { 
+    width: auto; 
+    white-space: nowrap;
+    text-align: center;
+    padding: 3px 2px;
+} /* Действия */
+
+#tab-materials .table thead {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: white;
+}
+
+#tab-materials .table thead th {
+    background: var(--primary-color) !important;
+    color: white !important;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+#tab-materials .table thead tr:first-child th {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Стили для кнопок действий в СНАБ */
+#tab-materials .action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+#tab-materials .action-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+#tab-materials .action-btn.edit-btn {
+    color: #2c3e50;
+    font-size: 12px; /* В полтора раза меньше (18px / 1.5 = 12px) */
+}
+
+#tab-materials .action-btn.edit-btn:hover {
+    color: #2c3e50;
+}
+
+#tab-materials .action-btn.delete-btn {
+    color: #e74c3c;
+}
+
+#tab-materials .action-btn.delete-btn:hover {
+    color: #c0392b;
+}
+
+#tab-materials .actions-cell {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+}
 
