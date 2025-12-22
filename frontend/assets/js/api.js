@@ -163,6 +163,7 @@ const projectStatisticsAPI = {
 
 const projectWorksAPI = {
     getByProject: (projectId) => api.get(`/project-works?project_id=${projectId}`),
+    getById: (id) => api.get(`/project-works/${id}`),
     create: (data) => api.post('/project-works', data),
     update: (id, data) => api.put(`/project-works/${id}`, data),
     delete: (id) => api.delete(`/project-works/${id}`)
@@ -170,6 +171,7 @@ const projectWorksAPI = {
 
 const projectMaterialsAPI = {
     getByProject: (projectId) => api.get(`/project-materials-estimate?project_id=${projectId}`),
+    getById: (id) => api.get(`/project-materials-estimate/${id}`),
     create: (data) => api.post('/project-materials-estimate', data),
     update: (id, data) => api.put(`/project-materials-estimate/${id}`, data),
     delete: (id) => api.delete(`/project-materials-estimate/${id}`)
@@ -219,9 +221,27 @@ const learningSessionsAPI = {
     }
 };
 
+const workResourcesAPI = {
+    getById: (id) => api.get(`/work-resources/${id}`),
+    getByWork: (workId) => api.get(`/work-resources/work/${workId}`),
+    create: (data) => api.post('/work-resources', data),
+    update: (id, data) => api.put(`/work-resources/${id}`, data),
+    delete: (id) => api.delete(`/work-resources/${id}`),
+    getCategories: () => api.get('/work-resources/categories')
+};
+
 const rulesAPI = {
     getAll: () => api.get('/rules'),
     getById: (id) => api.get(`/rules/${id}`),
     update: (id, data) => api.put(`/rules/${id}`, data)
+};
+
+const listMatAPI = {
+    getAll: (params) => {
+        const query = params ? '?' + new URLSearchParams(params).toString() : '';
+        return api.get(`/list-mat${query}`);
+    },
+    getById: (id) => api.get(`/list-mat/${id}`),
+    create: (data) => api.post('/list-mat', data)
 };
 

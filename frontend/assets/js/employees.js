@@ -262,7 +262,3 @@ window.onclick = function(event) {
     }
 };
 
-
-
-
-

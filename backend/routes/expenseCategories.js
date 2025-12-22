@@ -8,7 +8,7 @@ const pool = require('../db');
 
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM taiga.expense_categories ORDER BY name');
+        const result = await pool.query('SELECT * FROM taiga.cat_expense ORDER BY name');
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching expense categories:', error);

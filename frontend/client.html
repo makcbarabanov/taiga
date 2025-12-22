@@ -19,8 +19,11 @@
                     <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
                         📚
                     </a>
-                    <a href="rules.html" title="Правила записи расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    <a href="catalogs.html" title="Справочники работ и материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
                         📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
                     </a>
                 </div>
             </h1>
@@ -63,7 +66,7 @@
                                 <th>План (%)</th>
                                 <th>Факт (%)</th>
                                 <th>Разница</th>
-                                <th>Действия</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="stat-tbody">
@@ -76,21 +79,36 @@
             <!-- Tab: Работы -->
             <div id="tab-works" class="tab-content active">
                 <div class="table-container">
-                    <div class="works-table-header">
-                        <h2 id="works-header-text" style="margin: 0; display: inline;">Опись работ</h2>
-                        <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
-                    </div>
                     <table class="table" id="works-table">
                         <thead class="sticky-header">
                             <tr>
-                                <th>Раздел</th>
-                                <th>Наименование работы</th>
-                                <th>Ед. изм.</th>
-                                <th>Кол-во</th>
+                                <th style="width: 30px;" rowspan="2"></th>
+                                <th rowspan="2" style="border-right: 1px solid rgba(255, 255, 255, 0.3);">Раздел</th>
+                                <th rowspan="2" style="border-right: 1px solid rgba(255, 255, 255, 0.3);">
+                                    Наименование работы <span id="client-name-in-header" style="color: #ff9800; font-weight: normal; margin-left: 1em;"></span>
+                                    <span class="filter-link" data-filter="add" onclick="openAddWorkModal()" title="Добавить работу" style="cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; user-select: none; font-size: 18px; line-height: 1; color: #27ae60; font-weight: bold; margin-left: 10px;">➕</span>
+                                </th>
+                                <th rowspan="2" style="border-right: 1px solid rgba(255, 255, 255, 0.3);">Ед. изм.</th>
+                                <th colspan="3" style="text-align: center; border-right: 1px solid rgba(255, 255, 255, 0.3);">
+                                    Готово
+                                    <span class="filter-link" data-filter="in-progress" onclick="filterWorks('in-progress')" title="В процессе" style="cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; user-select: none; font-size: 18px; line-height: 1; margin-left: 10px;">⏳</span>
+                                </th>
+                                <th rowspan="2" style="border-right: 1px solid rgba(255, 255, 255, 0.3);"></th>
+                            </tr>
+                            <tr>
+                                <th style="text-align: center; border-right: 1px solid rgba(255, 255, 255, 0.3);">
+                                    <span class="filter-link active" data-filter="all" onclick="filterWorks('all')" title="Все работы" style="cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; user-select: none; font-size: 18px; line-height: 1;">📋</span>
+                                </th>
+                                <th style="text-align: center; border-right: 1px solid rgba(255, 255, 255, 0.3);">
+                                    <span class="filter-link" data-filter="done" onclick="filterWorks('done')" title="Готово" style="cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; user-select: none; font-size: 18px; line-height: 1;">✔</span>
+                                </th>
+                                <th style="text-align: center;">
+                                    <span class="filter-link" data-filter="remaining" onclick="filterWorks('remaining')" title="Остались" style="cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; user-select: none; font-size: 18px; line-height: 1;">⏰</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody id="works-tbody">
-                            <tr><td colspan="4" class="loading">Загрузка...</td></tr>
+                            <tr><td colspan="8" class="loading">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -99,7 +117,19 @@
             <!-- Tab: Снаб (Материалы) -->
             <div id="tab-materials" class="tab-content">
                 <div class="tab-header">
-                    <h2>Ведомость материалов (СНАБ)</h2>
+                    <div>
+                        <h2>Ведомость материалов: 
+                            <span class="filter-links">
+                                <span class="filter-link active" data-filter="all" onclick="filterMaterials('all')">все</span> | 
+                                <span class="filter-link" data-filter="purchased" onclick="filterMaterials('purchased')">куплено</span> | 
+                                <span class="filter-link" data-filter="remaining" onclick="filterMaterials('remaining')">осталось</span> - 
+                                <span class="filter-link" data-filter="material" onclick="filterMaterials('material')">мат</span> | 
+                                <span class="filter-link" data-filter="consumable" onclick="filterMaterials('consumable')">расход</span> | 
+                                <span class="filter-link" data-filter="tool" onclick="filterMaterials('tool')">инструм</span> | 
+                                <span class="filter-link" data-filter="overhead" onclick="filterMaterials('overhead')">накладные</span>
+                            </span>
+                        </h2>
+                    </div>
                     <button class="btn btn-primary" onclick="openAddMaterialModal()">+ Добавить материал</button>
                 </div>
                 <div class="table-container">
@@ -166,8 +196,8 @@
                     <button class="btn btn-primary" onclick="openAddJournalModal()">+ Добавить запись</button>
                 </div>
                 <div class="table-container">
-                    <table class="table">
-                        <thead>
+                    <table class="table" id="journal-table">
+                        <thead class="sticky-header">
                             <tr>
                                 <th>Дата</th>
                                 <th>Время</th>
@@ -177,7 +207,7 @@
                                 <th>Выполнено</th>
                                 <th>Ед. изм.</th>
                                 <th>Осталось</th>
-                                <th>Действия</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody id="journal-tbody">
@@ -214,6 +244,3 @@
     <script src="assets/js/client.js"></script>
 </body>
 </html>
-
-
-

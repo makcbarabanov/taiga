@@ -9,20 +9,27 @@ const pool = require('../db');
 router.get('/', async (req, res) => {
     try {
         const { project_id } = req.query;
-        let query = 'SELECT * FROM taiga.project_materials_estimate';
+        let query = `
+            SELECT 
+                pme.*,
+                rc.name as resource_category_name
+            FROM taiga.project_materials_estimate pme
+            LEFT JOIN taiga.cat_expense rc ON pme.resource_category_id = rc.id
+        `;
         const params = [];
         
         if (project_id) {
-            query += ' WHERE project_id = $1';
+            query += ' WHERE pme.project_id = $1';
             params.push(project_id);
         }
         
-        query += ' ORDER BY category, material_name';
+        query += ' ORDER BY pme.category, pme.material_name';
         const result = await pool.query(query, params);
         res.json(result.rows);
     } catch (error) {
         console.error('Error fetching project materials:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ error: error.message, details: error.stack });
     }
 });
 
@@ -39,13 +46,13 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { project_id, category, material_name, unit_id, planned_quantity, planned_price, planned_cost } = req.body;
+        const { project_id, category, material_name, unit_id, planned_quantity, planned_price, planned_cost, resource_category_id, material_id } = req.body;
         const result = await pool.query(
             `INSERT INTO taiga.project_materials_estimate 
-             (project_id, category, material_name, unit_id, planned_quantity, planned_price, planned_cost)
-             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+             (project_id, category, material_name, unit_id, planned_quantity, planned_price, planned_cost, resource_category_id, material_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
             [project_id, category || null, material_name, unit_id || null,
-             planned_quantity || null, planned_price || null, planned_cost || null]
+             planned_quantity || null, planned_price || null, planned_cost || null, resource_category_id || null, material_id || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -56,13 +63,20 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { category, material_name, unit_id, planned_quantity, planned_price, planned_cost } = req.body;
+        const { category, material_name, unit_id, planned_quantity, planned_price, planned_cost, resource_category_id, material_id } = req.body;
         const result = await pool.query(
-            `UPDATE taiga.project_materials_estimate SET category = $1, material_name = $2, unit_id = $3,
-             planned_quantity = $4, planned_price = $5, planned_cost = $6
-             WHERE id = $7 RETURNING *`,
-            [category || null, material_name, unit_id || null,
-             planned_quantity || null, planned_price || null, planned_cost || null, id]
+            `UPDATE taiga.project_materials_estimate SET 
+             category = COALESCE($1, category), 
+             material_name = COALESCE($2, material_name), 
+             unit_id = COALESCE($3, unit_id),
+             planned_quantity = COALESCE($4, planned_quantity), 
+             planned_price = COALESCE($5, planned_price), 
+             planned_cost = COALESCE($6, planned_cost),
+             resource_category_id = COALESCE($7, resource_category_id),
+             material_id = COALESCE($8, material_id)
+             WHERE id = $9 RETURNING *`,
+            [category, material_name, unit_id,
+             planned_quantity, planned_price, planned_cost, resource_category_id, material_id, id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
         res.json(result.rows[0]);

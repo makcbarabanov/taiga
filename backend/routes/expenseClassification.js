@@ -25,7 +25,7 @@ router.get('/classify', async (req, res) => {
                 c.name as category_name,
                 c.alias as category_alias
             FROM taiga.expense_classification_rules r
-            JOIN taiga.expense_categories c ON r.category_id = c.id
+            JOIN taiga.cat_expense c ON r.category_id = c.id
             WHERE r.is_active = TRUE
             ORDER BY r.priority DESC, r.id ASC
         `);
@@ -123,7 +123,7 @@ router.post('/learn', async (req, res) => {
 
         // Проверяем, существует ли категория
         const categoryCheck = await pool.query(
-            'SELECT id, name, alias FROM taiga.expense_categories WHERE id = $1',
+            'SELECT id, name, alias FROM taiga.cat_expense WHERE id = $1',
             [category_id]
         );
 
@@ -216,7 +216,7 @@ router.get('/rules', async (req, res) => {
                 c.name as category_name,
                 c.alias as category_alias
             FROM taiga.expense_classification_rules r
-            JOIN taiga.expense_categories c ON r.category_id = c.id
+            JOIN taiga.cat_expense c ON r.category_id = c.id
             ORDER BY r.priority DESC, r.id ASC
         `);
         res.json(result.rows);

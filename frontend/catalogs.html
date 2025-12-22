@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Справочники</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .catalogs-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        .catalog-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .catalog-tab:hover {
+            color: var(--secondary-color);
+        }
+        .catalog-tab.active {
+            color: var(--secondary-color);
+            border-bottom-color: var(--secondary-color);
+            font-weight: 600;
+        }
+        .catalog-content {
+            display: none;
+        }
+        .catalog-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="actions">
+                <h2>Справочники работ и ресурсов</h2>
+            </div>
+
+            <!-- Tabs -->
+            <div class="catalogs-tabs">
+                <button class="catalog-tab active" onclick="switchTab('works')">📋 Справочник работ</button>
+                <button class="catalog-tab" onclick="switchTab('resources')">📦 Справочник ресурсов</button>
+            </div>
+
+            <!-- Works Catalog -->
+            <div id="works-content" class="catalog-content active">
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddWorkModal()">+ Добавить работу</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th>ID</th>
+                                <th>Наименование работы</th>
+                                <th>Единица измерения</th>
+                                <th>Описание</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="works-tbody">
+                            <tr><td colspan="5" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Resources Catalog -->
+            <div id="resources-content" class="catalog-content">
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="openAddResourceModal()">+ Добавить ресурс</button>
+                </div>
+                <div class="table-container">
+                    <table class="table">
+                        <thead class="sticky-header">
+                            <tr>
+                                <th>ID</th>
+                                <th>Наименование</th>
+                                <th>Категория расходов</th>
+                                <th>Категория ресурса</th>
+                                <th>Единица измерения</th>
+                                <th>Описание</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="resources-tbody">
+                            <tr><td colspan="7" class="loading">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/catalogs.js"></script>
+</body>
+</html>

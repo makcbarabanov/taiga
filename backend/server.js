@@ -34,6 +34,9 @@ app.use('/api/db-info', require('./routes/dbInfo'));
 app.use('/api/expense-classification', require('./routes/expenseClassification'));
 app.use('/api/rules', require('./routes/rules'));
 app.use('/api/learning-sessions', require('./routes/learningSessions'));
+app.use('/api/work-resources', require('./routes/workResources'));
+app.use('/api/catalogs', require('./routes/catalogs'));
+app.use('/api/list-mat', require('./routes/listMat'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -60,6 +63,5 @@ app.listen(PORT, () => {
     console.log(`🚀 Taiga Backend API запущен на порту ${PORT}`);
     console.log(`📡 API доступен по адресу: http://localhost:${PORT}/api`);
 });
-
 
 

@@ -137,4 +137,3 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('focus', () => {
     updateCashInNavigation();
 });
-

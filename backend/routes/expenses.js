@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { syncExpenseToSnab } = require('../utils/syncExpenseToSnab');
 
 // GET /api/expenses - получить все расходы
 router.get('/', async (req, res) => {
@@ -98,7 +99,26 @@ router.post('/', async (req, res) => {
             ]
         );
         
-        res.status(201).json(result.rows[0]);
+        const newExpense = result.rows[0];
+        
+        // Синхронизируем с СНАБ
+        const syncResult = await syncExpenseToSnab(newExpense);
+        
+        // Если требуется действие (материал не найден для обязательной категории)
+        if (syncResult.requiresAction) {
+            return res.status(201).json({
+                ...newExpense,
+                _sync: {
+                    requiresAction: true,
+                    message: `Материал "${syncResult.materialName}" из категории "${syncResult.category}" не найден в СНАБ. Требуется добавить материал в СНАБ.`
+                }
+            });
+        }
+        
+        res.status(201).json({
+            ...newExpense,
+            _sync: syncResult
+        });
     } catch (error) {
         console.error('Error creating expense:', error);
         res.status(500).json({ error: error.message });
@@ -161,7 +181,30 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Expense not found' });
         }
         
-        res.json(result.rows[0]);
+        const updatedExpense = result.rows[0];
+        
+        // Синхронизируем с СНАБ (если изменились категория, subcategory, quantity, price, amount)
+        if (req.body.category_id !== undefined || req.body.subcategory !== undefined || 
+            req.body.quantity !== undefined || req.body.price !== undefined || req.body.amount !== undefined) {
+            const syncResult = await syncExpenseToSnab(updatedExpense);
+            
+            if (syncResult.requiresAction) {
+                return res.json({
+                    ...updatedExpense,
+                    _sync: {
+                        requiresAction: true,
+                        message: `Материал "${syncResult.materialName}" из категории "${syncResult.category}" не найден в СНАБ. Требуется добавить материал в СНАБ.`
+                    }
+                });
+            }
+            
+            return res.json({
+                ...updatedExpense,
+                _sync: syncResult
+            });
+        }
+        
+        res.json(updatedExpense);
     } catch (error) {
         console.error('Error updating expense:', error);
         res.status(500).json({ error: error.message });
@@ -186,6 +229,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-
-
-

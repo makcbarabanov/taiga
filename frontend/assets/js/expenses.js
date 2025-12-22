@@ -318,7 +318,7 @@ function renderExpenses(filteredExpenses = null) {
     let data = filteredExpenses || expenses;
     
     if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="12" class="empty-state"><p>Нет расходов</p><p>Добавьте первую строку</p></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="empty-state"><p>Нет расходов</p><p>Добавьте первую строку</p></td></tr>';
         return;
     }
     
@@ -387,6 +387,10 @@ function renderExpenses(filteredExpenses = null) {
                     </select>
                 </td>
                 <td class="col-comment"><input type="text" class="editable-cell" data-field="comment" data-id="${expense.id}" value="${expense.comment || ''}"></td>
+                <td class="col-actions">
+                    <button class="btn-icon" onclick="editExpense(${expense.id})" title="Редактировать">✏️</button>
+                    <button class="btn-icon" onclick="deleteExpense(${expense.id})" title="Удалить">🗑️</button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -646,7 +650,7 @@ function filterExpenses() {
             // Фильтр для записей без магазина
             filtered = filtered.filter(item => !item.shop_id || item.shop_id === null);
         } else {
-            filtered = filtered.filter(item => item.shop_id === parseInt(shopId));
+        filtered = filtered.filter(item => item.shop_id === parseInt(shopId));
         }
     }
     
@@ -839,10 +843,6 @@ function updateClientNameInRow(selectElement) {
 
 // Удаление расхода (убрано из интерфейса, но функция оставлена для возможного использования)
 async function deleteExpense(id) {
-    if (!confirm('Вы уверены, что хотите удалить этот расход?')) {
-        return;
-    }
-    
     try {
         await expensesAPI.delete(id);
         await loadExpenses();
@@ -852,7 +852,6 @@ async function deleteExpense(id) {
         if (typeof updateTodayCash === 'function') {
             await updateTodayCash();
         }
-        alert('Расход успешно удалён!');
     } catch (error) {
         console.error('Ошибка удаления расхода:', error);
         alert('Ошибка удаления расхода');
@@ -885,4 +884,3 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     alert('Обработка файлов будет реализована позже');
     closeUploadModal();
 });
-

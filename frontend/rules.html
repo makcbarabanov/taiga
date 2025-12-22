@@ -135,8 +135,2900 @@
                     <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
                         📚
                     </a>
-                    <a href="rules.html" title="Правила записи расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
                         📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
+                    </a>
+                </div>
+            </h1>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="expenses.html" class="nav-link" id="expenses-nav-link">Расходы</a>
+                    <a href="income.html" class="nav-link">Доходы</a>
+                    <a href="taiga.html" class="nav-link">Объекты</a>
+                    <a href="cash.html" class="nav-link" id="cash-nav-link">Касса</a>
+                </div>
+                <div class="nav-right">
+                    <a href="shops.html" class="nav-link directory-link">Маги</a>
+                    <a href="employees.html" class="nav-link directory-link">Сотрудники</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <div class="rules-content" id="rules-content">
+                <div class="loading">Загрузка правил...</div>
+            </div>
+            
+            <!-- Таблица сессий обучения -->
+            <div class="rules-content" style="margin-top: 30px;">
+                <h2>📊 История сессий обучения</h2>
+                <div id="learning-sessions-table">
+                    <div class="loading">Загрузка сессий обучения...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/navigation.js"></script>
+    <script>
+        // Загрузка правил из БД
+        async function loadRules() {
+            try {
+                const rules = await rulesAPI.getAll();
+                const contentDiv = document.getElementById('rules-content');
+                
+                if (rules.length === 0) {
+                    contentDiv.innerHTML = '<p>Правила не найдены</p>';
+                    return;
+                }
+                
+                let html = '';
+                rules.forEach(rule => {
+                    if (rule.section === 'intro') {
+                        html += `<h1>${rule.title}</h1>`;
+                        html += rule.content;
+                    } else {
+                        html += `<h2>${rule.title}</h2>`;
+                        html += rule.content;
+                    }
+                });
+                
+                contentDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки правил:', error);
+                document.getElementById('rules-content').innerHTML = 
+                    '<p>Ошибка загрузки правил. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загрузка сессий обучения
+        async function loadLearningSessions() {
+            try {
+                const sessions = await learningSessionsAPI.getAll();
+                const tableDiv = document.getElementById('learning-sessions-table');
+                
+                if (sessions.length === 0) {
+                    tableDiv.innerHTML = '<p>Сессии обучения не найдены</p>';
+                    return;
+                }
+                
+                let html = '<table class="learning-sessions-table">';
+                html += '<thead><tr>';
+                html += '<th>Дата</th>';
+                html += '<th>Вопросов</th>';
+                html += '<th>Уникальных</th>';
+                html += '<th>Правильных</th>';
+                html += '<th>Прочих</th>';
+                html += '<th>Конверсия</th>';
+                html += '<th>Чему обучился</th>';
+                html += '</tr></thead><tbody>';
+                
+                sessions.forEach(session => {
+                    const conversionClass = 
+                        session.conversion_rate >= 80 ? 'conversion-good' :
+                        session.conversion_rate >= 50 ? 'conversion-medium' : 'conversion-bad';
+                    
+                    html += '<tr>';
+                    html += `<td>${new Date(session.session_date).toLocaleDateString('ru-RU')}</td>`;
+                    html += `<td>${session.questions_count}</td>`;
+                    html += `<td>${session.unique_questions_count}</td>`;
+                    html += `<td>${session.correct_answers_count}</td>`;
+                    html += `<td>${session.other_answers_count}</td>`;
+                    html += `<td class="${conversionClass}">${session.conversion_rate}%</td>`;
+                    html += `<td>${session.learned_new || '-'}</td>`;
+                    html += '</tr>';
+                });
+                
+                html += '</tbody></table>';
+                tableDiv.innerHTML = html;
+            } catch (error) {
+                console.error('Ошибка загрузки сессий обучения:', error);
+                document.getElementById('learning-sessions-table').innerHTML = 
+                    '<p>Ошибка загрузки сессий обучения. Обновите страницу.</p>';
+            }
+        }
+        
+        // Загружаем правила и сессии при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRules();
+            loadLearningSessions();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiga - Правила обучения</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <style>
+        .rules-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            line-height: 1.8;
+        }
+        .rules-content h1 {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .rules-content h2 {
+            color: var(--secondary-color);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .rules-content h3 {
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .rules-content ul, .rules-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        .rules-content li {
+            margin-bottom: 8px;
+        }
+        .rules-content code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .rules-content pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid var(--secondary-color);
+            margin: 20px 0;
+        }
+        .rules-content pre code {
+            background: none;
+            padding: 0;
+        }
+        .rules-content strong {
+            color: var(--primary-color);
+        }
+        .rules-content hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 30px 0;
+        }
+        .rules-content blockquote {
+            border-left: 4px solid var(--secondary-color);
+            padding-left: 20px;
+            margin: 20px 0;
+            color: #666;
+            font-style: italic;
+        }
+        .rules-content h2:has-text("Статистика") {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        .statistics-box {
+            background: #f8f9fa;
+            border: 2px solid var(--success-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .statistics-box h3 {
+            color: var(--success-color);
+            margin-top: 0;
+        }
+        .learning-sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .learning-sessions-table th,
+        .learning-sessions-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .learning-sessions-table th {
+            background: var(--secondary-color);
+            color: white;
+            font-weight: 600;
+        }
+        .learning-sessions-table tr:hover {
+            background: #f8f9fa;
+        }
+        .conversion-good {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+        .conversion-medium {
+            color: #f39c12;
+            font-weight: 600;
+        }
+        .conversion-bad {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>
+                <img src="assets/images/logo_taiga.png" alt="Taiga" style="height: 40px; vertical-align: middle;">
+                <span style="position: absolute; left: 50%; transform: translateX(-50%);">Управление компанией</span>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="rules.html" title="Правила обучения распознавания расходов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📚
+                    </a>
+                    <a href="catalogs.html" title="Справочник материалов" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        📋
+                    </a>
+                    <a href="catalogs.html" title="Справочник работ" style="font-size: 24px; text-decoration: none; color: var(--secondary-color); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.2)'; this.style.color='#2980b9';" onmouseout="this.style.transform='scale(1)'; this.style.color='var(--secondary-color)';">
+                        🔨
                     </a>
                 </div>
             </h1>

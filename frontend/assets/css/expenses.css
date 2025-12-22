@@ -387,3 +387,328 @@
     margin-left: auto;
 }
 
+
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
+}
+
+
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
+}
+
+
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
+}
+
+
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
+}
+
+
+
+/* Стили для фильтров */
+.filters {
+    display: flex;
+    flex-wrap: nowrap; /* Не переносим на новую строку */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    align-items: center;
+    overflow-x: auto; /* Горизонтальный скролл, если не помещается */
+}
+
+.filters select,
+.filters input[type="text"],
+.filters input[type="number"],
+.filters input[type="month"] {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+    max-width: 120px;
+    flex-shrink: 0; /* Не сжимаются */
+}
+
+.filters select {
+    cursor: pointer;
+}
+
+/* Подкатегория - такая же ширина как категория */
+#filter-subcategory {
+    min-width: 120px;
+    max-width: 120px;
+}
+
+.filters input[type="text"],
+.filters input[type="number"] {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters input[type="month"] {
+    min-width: 130px;
+    max-width: 140px;
+}
+
+/* Поля цены и стоимости - компактные */
+.filters .filter-price,
+.filters .filter-amount {
+    min-width: 90px;
+    max-width: 100px;
+}
+
+.filters .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.filters .btn {
+    margin-left: auto;
+}
+
