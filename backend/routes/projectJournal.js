@@ -32,42 +32,95 @@ async function calculateRemainingAtTime(client, workId, date, timeStart, exclude
     if (!workId) return null;
     
     // Получаем плановое количество работы
-    // Пробуем сначала p_feruz, потом project_works
-    let workResult;
+    // Пробуем сначала project_works (основная таблица), потом p_feruz (fallback)
+    let plannedQuantity = 0;
+    
     try {
-        workResult = await client.query(
-            'SELECT quantity FROM taiga.p_feruz WHERE id = $1',
-            [workId]
-        );
-    } catch (e) {
-        workResult = await client.query(
+        // Сначала пробуем project_works
+        const workResult = await client.query(
             'SELECT quantity FROM taiga.project_works WHERE id = $1',
             [workId]
         );
+        
+        if (workResult.rows.length > 0 && workResult.rows[0].quantity) {
+            plannedQuantity = parseFloat(workResult.rows[0].quantity) || 0;
+        } else {
+            // Если не нашли в project_works, пробуем p_feruz
+            try {
+                const feruzResult = await client.query(
+                    'SELECT quantity FROM taiga.p_feruz WHERE id = $1',
+                    [workId]
+                );
+                if (feruzResult.rows.length > 0 && feruzResult.rows[0].quantity) {
+                    plannedQuantity = parseFloat(feruzResult.rows[0].quantity) || 0;
+                }
+            } catch (e2) {
+                // Если p_feruz не существует или ошибка - игнорируем
+                console.warn('Не удалось получить quantity из p_feruz для work_id=' + workId + ':', e2.message);
+            }
+        }
+    } catch (e) {
+        // Если project_works не существует или ошибка, пробуем p_feruz
+        try {
+            const feruzResult = await client.query(
+                'SELECT quantity FROM taiga.p_feruz WHERE id = $1',
+                [workId]
+            );
+            if (feruzResult.rows.length > 0 && feruzResult.rows[0].quantity) {
+                plannedQuantity = parseFloat(feruzResult.rows[0].quantity) || 0;
+            }
+        } catch (e2) {
+            console.error('Ошибка при получении quantity для работы ' + workId + ':', e2.message);
+            return null;
+        }
     }
     
-    if (workResult.rows.length === 0 || !workResult.rows[0].quantity) {
+    if (plannedQuantity === 0) {
         return null;
     }
     
-    const plannedQuantity = parseFloat(workResult.rows[0].quantity) || 0;
-    
     // Находим все записи журнала для этой работы, которые были сделаны ДО текущей записи
     // Сортируем по дате и времени, чтобы учесть порядок выполнения
-    let query = `
-        SELECT COALESCE(SUM(quantity_completed), 0) as total_completed
-        FROM taiga.project_journal
-        WHERE work_id = $1
-        AND (
-            date < $2
-            OR (date = $2 AND (time_start < $3 OR (time_start IS NULL AND $3 IS NOT NULL)))
-        )
-    `;
-    const params = [workId, date, timeStart || null];
+    if (!date) {
+        return null; // Не можем вычислить без даты
+    }
+    
+    // Строим запрос с правильной обработкой NULL для timeStart
+    // Используем два отдельных запроса в зависимости от наличия timeStart
+    let query;
+    const params = [workId, date];
+    
+    if (timeStart) {
+        // Если timeStart указан, используем его для сравнения
+        query = `
+            SELECT COALESCE(SUM(quantity_completed), 0) as total_completed
+            FROM taiga.project_journal
+            WHERE work_id = $1
+            AND (
+                date < $2::date
+                OR (date = $2::date AND (
+                    time_start IS NULL 
+                    OR (time_start IS NOT NULL AND time_start::time < $3::time)
+                ))
+            )
+        `;
+        params.push(timeStart);
+    } else {
+        // Если timeStart не указан, считаем что записи без времени идут раньше
+        query = `
+            SELECT COALESCE(SUM(quantity_completed), 0) as total_completed
+            FROM taiga.project_journal
+            WHERE work_id = $1
+            AND (
+                date < $2::date
+                OR (date = $2::date AND time_start IS NULL)
+            )
+        `;
+    }
     
     // Исключаем текущую запись при редактировании
     if (excludeJournalId) {
-        query += ' AND id != $4';
+        query += ' AND id != $' + (params.length + 1);
         params.push(excludeJournalId);
     }
     
@@ -385,6 +438,46 @@ router.put('/:id', async (req, res) => {
             employee_ids // массив ID сотрудников (если передан, заменяем всех)
         } = req.body;
         
+        // Получаем старую запись для сравнения
+        const oldEntry = await client.query(
+            'SELECT date, time_start, work_id, quantity_completed FROM taiga.project_journal WHERE id = $1',
+            [id]
+        );
+        
+        if (oldEntry.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: 'Entry not found' });
+        }
+        
+        const oldRow = oldEntry.rows[0];
+        // Преобразуем даты в строки для корректного сравнения
+        let oldDate = null;
+        if (oldRow.date) {
+            if (oldRow.date instanceof Date) {
+                oldDate = oldRow.date.toISOString().split('T')[0];
+            } else {
+                // Если это строка, пытаемся извлечь дату
+                const dateStr = String(oldRow.date);
+                oldDate = dateStr.split('T')[0].split(' ')[0];
+            }
+        }
+        const oldTimeStart = oldRow.time_start ? String(oldRow.time_start) : null;
+        const oldWorkId = oldRow.work_id;
+        const oldQuantityCompleted = oldRow.quantity_completed;
+        
+        // Преобразуем новую дату в строку для сравнения
+        let newDate = null;
+        if (date) {
+            if (date instanceof Date) {
+                newDate = date.toISOString().split('T')[0];
+            } else {
+                // Если это строка, пытаемся извлечь дату
+                const dateStr = String(date);
+                newDate = dateStr.split('T')[0].split(' ')[0];
+            }
+        }
+        const newTimeStart = time_start ? String(time_start) : null;
+        
         // Вычисляем часы автоматически, если не указаны
         let calculatedHours = hours;
         if (!calculatedHours && time_start && time_end) {
@@ -393,9 +486,21 @@ router.put('/:id', async (req, res) => {
         
         // Вычисляем remaining_at_time (сколько оставалось на момент редактирования записи)
         // Исключаем текущую запись из расчета, чтобы не учитывать её в сумме выполненных
-        const remainingAtTime = await calculateRemainingAtTime(client, work_id, date, time_start, id);
+        let remainingAtTime = null;
+        if (work_id && newDate) {
+            try {
+                remainingAtTime = await calculateRemainingAtTime(client, work_id, newDate, newTimeStart, id);
+            } catch (calcError) {
+                console.error('Ошибка при вычислении remaining_at_time:', calcError);
+                // Продолжаем без remaining_at_time, если ошибка
+            }
+        }
         
         // Обновляем запись в журнале
+        // Используем исходные значения из req.body для UPDATE, но нормализуем дату
+        const updateDate = newDate || date || null;
+        const updateTimeStart = newTimeStart || time_start || null;
+        
         const journalResult = await client.query(
             `UPDATE taiga.project_journal 
              SET date = $1, time_start = $2, time_end = $3, break_duration = $4,
@@ -403,8 +508,8 @@ router.put('/:id', async (req, res) => {
              WHERE id = $10 
              RETURNING *`,
             [
-                date, 
-                time_start || null, 
+                updateDate, 
+                updateTimeStart, 
                 time_end || null, 
                 break_duration || null,
                 calculatedHours || null, 
@@ -435,6 +540,110 @@ router.put('/:id', async (req, res) => {
             }
         }
         
+        // Пересчитываем remaining_at_time для всех последующих записей той же работы
+        // Это нужно, потому что изменение количества в текущей записи влияет на остаток в последующих
+        // Также пересчитываем, если изменилась дата/время или work_id
+        const workIdsToRecalculate = new Set();
+        if (work_id) workIdsToRecalculate.add(work_id);
+        if (oldWorkId && oldWorkId !== work_id) workIdsToRecalculate.add(oldWorkId);
+        
+        // Определяем, нужно ли пересчитывать (если изменилось количество, дата, время или work_id)
+        const quantityChanged = quantity_completed !== undefined && 
+                               parseFloat(quantity_completed || 0) !== parseFloat(oldQuantityCompleted || 0);
+        const needsRecalculation = 
+            oldDate !== newDate || 
+            oldTimeStart !== newTimeStart || 
+            oldWorkId !== work_id ||
+            quantityChanged;
+        
+        if (needsRecalculation && workIdsToRecalculate.size > 0 && newDate) {
+            try {
+                for (const recalcWorkId of workIdsToRecalculate) {
+                    // Находим все записи этой работы, которые идут после обновлённой записи
+                    // Используем новую дату/время для определения "после"
+                    let subsequentQuery;
+                    let subsequentParams;
+                    
+                    if (newTimeStart) {
+                        // Если время указано, используем его для сравнения
+                        subsequentQuery = `
+                            SELECT id, date, time_start 
+                            FROM taiga.project_journal 
+                            WHERE work_id = $1 
+                            AND id != $2
+                            AND (
+                                date > $3::date
+                                OR (date = $3::date AND (
+                                    time_start IS NULL 
+                                    OR (time_start IS NOT NULL AND time_start::time > $4::time)
+                                ))
+                            )
+                            ORDER BY date ASC, COALESCE(time_start, '00:00:00'::time) ASC
+                        `;
+                        subsequentParams = [recalcWorkId, id, newDate, newTimeStart];
+                    } else {
+                        // Если время не указано, ищем записи с более поздней датой или с временем на ту же дату
+                        subsequentQuery = `
+                            SELECT id, date, time_start 
+                            FROM taiga.project_journal 
+                            WHERE work_id = $1 
+                            AND id != $2
+                            AND (
+                                date > $3::date
+                                OR (date = $3::date AND time_start IS NOT NULL)
+                            )
+                            ORDER BY date ASC, COALESCE(time_start, '00:00:00'::time) ASC
+                        `;
+                        subsequentParams = [recalcWorkId, id, newDate];
+                    }
+                    
+                    const subsequentEntries = await client.query(subsequentQuery, subsequentParams);
+                    
+                    // Пересчитываем remaining_at_time для каждой последующей записи
+                    for (const entry of subsequentEntries.rows) {
+                        try {
+                            // Нормализуем дату записи
+                            let entryDate = null;
+                            if (entry.date) {
+                                if (entry.date instanceof Date) {
+                                    entryDate = entry.date.toISOString().split('T')[0];
+                                } else {
+                                    const dateStr = String(entry.date);
+                                    entryDate = dateStr.split('T')[0].split(' ')[0];
+                                }
+                            }
+                            const entryTimeStart = entry.time_start ? String(entry.time_start) : null;
+                            
+                            if (entryDate) {
+                                const newRemaining = await calculateRemainingAtTime(
+                                    client, 
+                                    recalcWorkId, 
+                                    entryDate, 
+                                    entryTimeStart, 
+                                    null // не исключаем запись, так как пересчитываем для неё
+                                );
+                                
+                                if (newRemaining !== null) {
+                                    await client.query(
+                                        'UPDATE taiga.project_journal SET remaining_at_time = $1 WHERE id = $2',
+                                        [newRemaining, entry.id]
+                                    );
+                                }
+                            }
+                        } catch (recalcError) {
+                            console.error(`Ошибка при пересчёте remaining_at_time для записи ${entry.id}:`, recalcError);
+                            // Продолжаем обработку других записей
+                        }
+                    }
+                }
+            } catch (recalcError) {
+                console.error('Ошибка при пересчёте последующих записей:', recalcError);
+                // Не прерываем транзакцию, так как основная запись уже обновлена
+                // Продолжаем выполнение, чтобы сохранить основную запись
+            }
+        }
+        
+        // Коммитим транзакцию - основная запись должна быть сохранена
         await client.query('COMMIT');
         
         // Возвращаем полную запись с сотрудниками
@@ -500,7 +709,10 @@ router.put('/:id', async (req, res) => {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error updating journal entry:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error stack:', error.stack);
+        console.error('Request params:', req.params);
+        console.error('Request body:', req.body);
+        res.status(500).json({ error: error.message, details: error.stack });
     } finally {
         client.release();
     }

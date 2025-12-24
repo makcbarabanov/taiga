@@ -14,6 +14,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Логирование всех запросов
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+    }
+    next();
+});
+
 // Routes
 app.use('/api/clients', require('./routes/clients'));
 app.use('/api/projects', require('./routes/projects'));
@@ -55,6 +64,10 @@ app.get('/', (req, res) => {
 // Error handling
 app.use((err, req, res, next) => {
     console.error('Error:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Request URL:', req.url);
+    console.error('Request method:', req.method);
+    console.error('Request body:', req.body);
     res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
